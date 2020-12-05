@@ -1,5 +1,6 @@
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/home/home_model.dart';
+import 'package:chat_app/presentation/search_friend/search_friend_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,8 +16,16 @@ class HomePage extends StatelessWidget {
           title: Text('ホーム'),
           actions: [
             IconButton(
-              onPressed: () {
-                // TODO
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchFriendPage(users),
+                  ),
+                );
+                // showBottomSheet(
+                //     context: context,
+                //     builder: (context) => SearchFriendPage(users));
               },
               padding: EdgeInsets.fromLTRB(0, 0, 15, 0),
               icon: Icon(
@@ -39,8 +48,11 @@ class HomePage extends StatelessWidget {
                 : Container(
                     child: ListView(
                       children: [
-                        Container(
-                          child: _myAccount(users, context),
+                        GestureDetector(
+                          onTap: () async {},
+                          child: Container(
+                            child: _myAccount(users, context),
+                          ),
                         ),
                         ExpansionTile(
                           initiallyExpanded: false,

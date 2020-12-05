@@ -5,9 +5,11 @@ class Users {
     userId = doc.id;
     name = doc['name'];
     imageURL = doc['imageURL'];
+    email = doc['email'];
   }
 
   String userId;
   String name;
   String imageURL;
+  String email;
 }
