@@ -1,5 +1,8 @@
+import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/bottom_navigation/bottom_navigation_page.dart';
 import 'package:chat_app/presentation/root/root_model.dart';
+import 'package:chat_app/presentation/signin/signin_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -9,18 +12,20 @@ class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<RootModel>(
-      create: (_) => RootModel()..getUser(),
+      create: (_) => RootModel(),
       child: Stack(
         children: [
           Scaffold(
             body: Consumer<RootModel>(
               builder: (context, model, child) {
-                loginCheck(model, context);
-                return Center(
-                  child: Container(
-                    child: Text('Loading...'),
-                  ),
-                );
+                // loginCheck(model, context);
+                return model.isLoading
+                    ? Container(
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : _convertPage(model.user, model.users);
               },
             ),
           ),
@@ -29,46 +34,15 @@ class RootPage extends StatelessWidget {
     );
   }
 
-  Future loginCheck(RootModel model, BuildContext context) async {
-    try {
-      if (model.user == null) {
-        await Navigator.pushReplacementNamed(
-          context,
-          '/login',
-        );
+  Widget _convertPage(User user, Users users) {
+    if (user == null) {
+      return SignInPage();
+    } else {
+      if (debug) {
+        return SignInPage();
       } else {
-        await model.fetchUsers();
-        if (debug) {
-          await Navigator.pushReplacementNamed(
-            context,
-            '/login',
-          );
-        } else {
-          await Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BottomNavigationPage(users: model.users),
-            ),
-          );
-        }
+        return BottomNavigationPage(users: users);
       }
-    } catch (e) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(e.toString()),
-            actions: [
-              FlatButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
     }
   }
 }

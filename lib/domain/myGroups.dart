@@ -8,4 +8,6 @@ class MyGroups {
 
   String groupsId;
   DocumentReference groupsRef;
+  String groupsName;
+  String imageURL;
 }

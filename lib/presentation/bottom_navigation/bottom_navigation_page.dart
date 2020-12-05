@@ -10,6 +10,7 @@ class BottomNavigationPage extends StatelessWidget {
     TalkListPage(),
     HomePage(),
   ];
+
   BottomNavigationPage({this.users});
   final Users users;
   @override
@@ -17,13 +18,14 @@ class BottomNavigationPage extends StatelessWidget {
     _pageList[0] = HomePage(users: users);
     _pageList[1] = TalkListPage(users: users);
     return ChangeNotifierProvider<BottomNavigationModel>(
-      create: (_) => BottomNavigationModel(),
+      create: (_) => BottomNavigationModel()..init(),
       child: Consumer<BottomNavigationModel>(builder: (context, model, child) {
         return Scaffold(
           // appBar: AppBar(
           //   title: Text(''),
           // ),
-          body: _pageList[model.currentIndex],
+          // body: _pageList[model.currentIndex],
+          body: _topPageBody(context),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: Colors.white,
             currentIndex: model.currentIndex,
@@ -43,6 +45,25 @@ class BottomNavigationPage extends StatelessWidget {
           ),
         );
       }),
+    );
+  }
+
+  Widget _topPageBody(BuildContext context) {
+    final model = Provider.of<BottomNavigationModel>(context);
+    final currentIndex = model.currentIndex;
+    return Stack(
+      children: [
+        _tabPage(currentIndex, 0, HomePage(users: users)),
+        _tabPage(currentIndex, 1, TalkListPage(users: users)),
+      ],
+    );
+  }
+
+  Widget _tabPage(int currentIndex, int tabIndex, StatelessWidget page) {
+    return Visibility(
+      visible: currentIndex == tabIndex,
+      maintainState: true,
+      child: page,
     );
   }
 }

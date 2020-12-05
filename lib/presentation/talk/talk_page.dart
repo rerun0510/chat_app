@@ -1,24 +1,84 @@
-import 'package:chat_app/domain/chatRoom.dart';
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/messages.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/talk/talk_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TalkPage extends StatelessWidget {
-  TalkPage({this.chatRoomInfo, this.users});
+  TalkPage({this.roomName, this.chatRoomInfo, this.users});
 
+  final String roomName;
   final ChatRoomInfo chatRoomInfo;
   final Users users;
   final messageAreaController = TextEditingController();
 
   GlobalKey globalKey = GlobalKey();
 
-  _chatBubble(TalkModel model, Messages messages, BuildContext context,
-      bool isMe, bool isSameUser, bool isAnotherDay) {
+  @override
+  Widget build(BuildContext context) {
+    bool isSameUser;
+    bool isAnotherDay;
+    return ChangeNotifierProvider<TalkModel>(
+      create: (_) => TalkModel()..fetchMessages(chatRoomInfo),
+      child: Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(roomName),
+        ),
+        body: Consumer<TalkModel>(
+          builder: (context, model, child) {
+            return Column(
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    reverse: true,
+                    padding: EdgeInsets.all(20),
+                    itemCount: model.messages.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final Messages messages = model.messages[index];
+
+                      final bool isMe =
+                          model.messages[index].userId == users.userId;
+
+                      if (index < model.messages.length - 1) {
+                        // 次のデータと比較する
+                        isSameUser =
+                            messages.userId == model.messages[index + 1].userId;
+                        isAnotherDay = DateFormat('yyyy/MM/dd')
+                                .format(messages.createdAt) !=
+                            DateFormat('yyyy/MM/dd')
+                                .format(model.messages[index + 1].createdAt);
+                        if (isAnotherDay) {
+                          // 日付を跨いで連投した場合はアイコンを再表示
+                          isSameUser = false;
+                        }
+                      } else {
+                        // 次のデータが存在しない場合
+                        isSameUser = false;
+                        isAnotherDay = true;
+                      }
+
+                      return _chatBubble(model, messages, context, isMe,
+                          isSameUser, isAnotherDay, index);
+                    },
+                  ),
+                ),
+                _sendMessageArea(model, context),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _chatBubble(TalkModel model, Messages messages, BuildContext context,
+      bool isMe, bool isSameUser, bool isAnotherDay, int index) {
     if (isMe) {
       return Column(
         children: [
@@ -42,7 +102,7 @@ class TalkPage extends StatelessWidget {
                                 )
                               ]),
                           child: Text(
-                            fromAtNow(messages.createdAt),
+                            _fromAtNow(messages.createdAt),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -97,9 +157,9 @@ class TalkPage extends StatelessWidget {
                         ],
                       );
                       if (selected == 0) {
-                        await updateMessage(messages, model, context);
+                        await _updateMessage(messages, model, context);
                       } else if (selected == 1) {
-                        await deleteMessage(messages, model, context);
+                        await _deleteMessage(messages, model, context);
                       }
                     },
                     child: Container(
@@ -158,7 +218,7 @@ class TalkPage extends StatelessWidget {
                                 )
                               ]),
                           child: Text(
-                            fromAtNow(messages.createdAt),
+                            _fromAtNow(messages.createdAt),
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 14,
@@ -168,6 +228,42 @@ class TalkPage extends StatelessWidget {
                       )
                     : null,
               ),
+              !isSameUser
+                  ? Row(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                blurRadius: 5,
+                              )
+                            ],
+                          ),
+                          child: CircleAvatar(
+                            radius: 15,
+                            backgroundImage: NetworkImage(
+                              _getUserImage(model.usersList, messages.userId),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          _getUserName(model.usersList, messages.userId),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black45,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    )
+                  : Container(
+                      child: null,
+                    ),
               Row(
                 children: [
                   Container(
@@ -208,43 +304,6 @@ class TalkPage extends StatelessWidget {
                   ),
                 ],
               ),
-              !isSameUser
-                  ? Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                blurRadius: 5,
-                              )
-                            ],
-                          ),
-                          child: CircleAvatar(
-                            radius: 15,
-                            backgroundImage: NetworkImage(
-                              'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text(
-                          // message.createdAt.toString(),
-                          'ユーザーネーム',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black45,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    )
-                  : Container(
-                      child: null,
-                    ),
             ],
           ),
         ],
@@ -252,7 +311,7 @@ class TalkPage extends StatelessWidget {
     }
   }
 
-  _sendMessageArea(TalkModel model, BuildContext context) {
+  Widget _sendMessageArea(TalkModel model, BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
       height: 70,
@@ -291,7 +350,7 @@ class TalkPage extends StatelessWidget {
                 : Colors.grey,
             onPressed: () async {
               if (model.message.isNotEmpty) {
-                await sendMessage(model, context);
+                await _sendMessage(model, context);
                 messageAreaController.clear();
                 model.setMessage('');
               }
@@ -302,57 +361,7 @@ class TalkPage extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    String prevUserId;
-    String prevDate;
-    return ChangeNotifierProvider<TalkModel>(
-      create: (_) => TalkModel()..fetchMessages(chatRoomInfo),
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          title: Text(chatRoomInfo.roomName),
-        ),
-        body: Consumer<TalkModel>(
-          builder: (context, model, child) {
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    // reverse: true,
-                    padding: EdgeInsets.all(20),
-                    itemCount: model.messages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Messages messages = model.messages[index];
-                      final bool isMe =
-                          model.messages[index].userId == users.userId;
-                      final bool isSameUser =
-                          prevUserId == model.messages[index].userId;
-                      prevUserId = model.messages[index].userId;
-
-                      final String date = DateFormat('yyyy/MM/dd')
-                          .format(model.messages[index].createdAt);
-                      final bool isAnotherDay = date != prevDate;
-                      prevDate = date;
-
-                      return _chatBubble(model, messages, context, isMe,
-                          isSameUser, isAnotherDay);
-                    },
-                  ),
-                ),
-                _sendMessageArea(model, context),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Future sendMessage(TalkModel model, BuildContext context) async {
+  Future _sendMessage(TalkModel model, BuildContext context) async {
     try {
       await model.sendMessage(chatRoomInfo.roomId, users.userId);
     } catch (e) {
@@ -375,7 +384,7 @@ class TalkPage extends StatelessWidget {
     }
   }
 
-  Future updateMessage(
+  Future _updateMessage(
       Messages messages, TalkModel model, BuildContext context) async {
     String updateMessage = messages.message;
     try {
@@ -442,7 +451,7 @@ class TalkPage extends StatelessWidget {
     }
   }
 
-  Future deleteMessage(
+  Future _deleteMessage(
       Messages messages, TalkModel model, BuildContext context) async {
     try {
       showDialog(
@@ -490,7 +499,7 @@ class TalkPage extends StatelessWidget {
     }
   }
 
-  String fromAtNow(DateTime date) {
+  String _fromAtNow(DateTime date) {
     final Duration difference = DateTime.now().difference(date);
     final int sec = difference.inSeconds;
     final String thisYear = DateFormat('yyyy').format(DateTime.now());
@@ -509,5 +518,23 @@ class TalkPage extends StatelessWidget {
     } else {
       return '今日';
     }
+  }
+
+  String _getUserName(List<Users> usersList, String userId) {
+    for (Users users in usersList) {
+      if (users.userId == userId) {
+        return users.name;
+      }
+    }
+    return '';
+  }
+
+  String _getUserImage(List<Users> usersList, String userId) {
+    for (Users users in usersList) {
+      if (users.userId == userId) {
+        return users.imageURL;
+      }
+    }
+    return '';
   }
 }

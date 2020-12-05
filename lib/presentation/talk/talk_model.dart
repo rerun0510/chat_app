@@ -1,32 +1,37 @@
-import 'package:chat_app/domain/chatRoom.dart';
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/member.dart';
 import 'package:chat_app/domain/messages.dart';
+import 'package:chat_app/domain/users.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TalkModel extends ChangeNotifier {
   List<Messages> messages = [];
-  List<Member> memberList;
+  List<Member> memberList = [];
+  List<Users> usersList = [];
   String message = '';
   bool updateFlg = true;
 
   Future fetchMessages(ChatRoomInfo chatRoomInfo) async {
-    final members = chatRoomInfo.roomRef.collection('member').snapshots();
-    members.listen((snapshot) {
-      final docs = snapshot.docs;
-      final memberList = docs.map((doc) => Member(doc)).toList();
-      this.memberList = memberList;
-      notifyListeners();
-    });
+    final members = await chatRoomInfo.roomRef.collection('member').get();
+    final docs = members.docs;
+    final memberList = docs.map((doc) => Member(doc)).toList();
+    this.memberList = memberList;
+
+    for (Member member in memberList) {
+      final doc = await member.usersRef.get();
+      this.usersList.add(Users(doc));
+    }
 
     final snapshots = chatRoomInfo.roomRef
         .collection('messages')
-        .orderBy('createdAt', descending: false)
+        .orderBy('createdAt', descending: true)
         .snapshots();
     snapshots.listen((snapshot) {
       final docs = snapshot.docs;
+      // todo ソートする
       final messageList = docs.map((doc) => Messages(doc)).toList();
+      messageList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       this.messages = messageList;
       notifyListeners();
     });
@@ -62,7 +67,7 @@ class TalkModel extends ChangeNotifier {
       },
     );
 
-    for (Member member in memberList) {
+    for (Member member in this.memberList) {
       final document = member.usersRef.collection('chatRoomInfo').doc(roomId);
       await document.update(
         {

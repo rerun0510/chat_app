@@ -8,6 +8,35 @@ class TalkListModel extends ChangeNotifier {
   List<ChatRoomInfo> chatRoomInfoList = [];
   List<ChatRoom> chatRoomList = [];
 
+  bool isLoading = false;
+
+  TalkListModel(String userId) {
+    _init(userId);
+  }
+
+  Future _init(String userId) async {
+    this.startLoading();
+    try {
+      await fetchTalkList(userId);
+    } catch (e) {
+      print(e);
+      throw ('エラーが発生しました');
+    } finally {
+      endLoading();
+      notifyListeners();
+    }
+  }
+
+  startLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
+
   Future fetchTalkList(String userId) async {
     final snapshot = FirebaseFirestore.instance
         .collection('users')
@@ -21,15 +50,26 @@ class TalkListModel extends ChangeNotifier {
       this.chatRoomInfoList = chatRoomInfoList;
 
       for (int i = 0; i < this.chatRoomInfoList.length; i++) {
-        final snapshots = this.chatRoomInfoList[i].roomRef.snapshots();
+        final snapshots = chatRoomInfoList[i].roomRef.snapshots();
         snapshots.listen((snapshot) {
           final doc = snapshot.data();
           if (doc['groupFlg']) {
             // グループチャットの場合
-            this.chatRoomInfoList[i].roomName = doc['roomName'];
-            this.chatRoomInfoList[i].imageURL = doc['imageURL'];
+            // groupsからgroupNameとimageURLを取得
+            final groupInfo = FirebaseFirestore.instance
+                .collection('groups')
+                .doc(doc['groupId'])
+                .snapshots();
+            groupInfo.listen((snapshot) {
+              final doc = snapshot.data();
+              this.chatRoomInfoList[i].roomName = doc['groupName'];
+              this.chatRoomInfoList[i].imageURL = doc['imageURL'];
+              notifyListeners();
+            });
           } else {
             // 個人チャットの場合
+            // chatRoom/roomId/memberのusersRefからUsersを参照し、
+            // nameとimageURLを取得
             final snapshots = this
                 .chatRoomInfoList[i]
                 .roomRef
@@ -38,21 +78,24 @@ class TalkListModel extends ChangeNotifier {
             snapshots.listen((snapshot) {
               final docs = snapshot.docs;
               final memberList = docs.map((doc) => Member(doc)).toList();
-              for (int j = 0; j < memberList.length; j++) {
-                if (memberList[j].userId != userId) {
-                  final snapshot = memberList[j].usersRef.snapshots();
+              for (Member member in memberList) {
+                if (member.userId != userId) {
+                  final snapshot = member.usersRef.snapshots();
                   snapshot.listen((snapshot) {
                     final doc = snapshot.data();
                     this.chatRoomInfoList[i].roomName = doc['name'];
                     this.chatRoomInfoList[i].imageURL = doc['imageURL'];
+                    notifyListeners();
                   });
                 }
               }
               notifyListeners();
             });
           }
+          notifyListeners();
         });
       }
+      notifyListeners();
     });
   }
 }

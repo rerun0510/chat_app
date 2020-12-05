@@ -14,129 +14,142 @@ class TalkListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TalkListModel>(
-      create: (_) => TalkListModel()..fetchTalkList(users.userId),
+      create: (_) => TalkListModel(users.userId),
       child: Scaffold(
         appBar: AppBar(
           title: Text('トーク'),
         ),
         body: Consumer<TalkListModel>(
           builder: (context, model, child) {
-            return ListView.builder(
-              itemCount: model.chatRoomInfoList.length,
-              itemBuilder: (BuildContext context, int index) {
-                final ChatRoomInfo chatRoomInfo = model.chatRoomInfoList[index];
-                return GestureDetector(
-                  onTap: () async {
-                    // トーク画面に遷移
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TalkPage(chatRoomInfo: chatRoomInfo, users: users),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
+            return model.isLoading
+                ? Container(
+                    child: Center(
+                      child: CircularProgressIndicator(),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(2),
-                          decoration: chatRoomInfo.unread
-                              ? BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(40)),
-                                  border: Border.all(
-                                    width: 2,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                )
-                              : BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.5),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                          child: CircleAvatar(
-                            radius: 35,
-                            backgroundImage: NetworkImage(
-                              chatRoomInfo.imageURL,
+                  )
+                : ListView.builder(
+                    itemCount: model.chatRoomInfoList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      final ChatRoomInfo chatRoomInfo =
+                          model.chatRoomInfoList[index];
+                      return GestureDetector(
+                        onTap: () async {
+                          // トーク画面に遷移
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TalkPage(
+                                  roomName: chatRoomInfo.roomName,
+                                  chatRoomInfo: chatRoomInfo,
+                                  users: users),
                             ),
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 15,
                           ),
-                        ),
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.65,
-                          padding: EdgeInsets.only(
-                            left: 20,
-                          ),
-                          child: Column(
+                          child: Row(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    chatRoomInfo.roomName,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              Container(
+                                padding: EdgeInsets.all(2),
+                                decoration: chatRoomInfo.unread
+                                    ? BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(40)),
+                                        border: Border.all(
+                                          width: 2,
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 2,
+                                            blurRadius: 5,
+                                          ),
+                                        ],
+                                      )
+                                    : BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            spreadRadius: 2,
+                                            blurRadius: 5,
+                                          ),
+                                        ],
+                                      ),
+                                child: CircleAvatar(
+                                  radius: 35,
+                                  backgroundImage: NetworkImage(
+                                    chatRoomInfo.imageURL != null
+                                        ? chatRoomInfo.imageURL
+                                        : 'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
                                   ),
-                                  Text(
-                                    fromAtNow(chatRoomInfo.updateAt),
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w300,
-                                      color: Colors.black54,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                height: 10,
+                                ),
                               ),
                               Container(
-                                alignment: Alignment.topLeft,
-                                child: Text(
-                                  chatRoomInfo.resentMessage,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.black54,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 2,
+                                width: MediaQuery.of(context).size.width * 0.65,
+                                padding: EdgeInsets.only(
+                                  left: 20,
+                                ),
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          chatRoomInfo.roomName != null
+                                              ? chatRoomInfo.roomName
+                                              : '',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        Text(
+                                          _fromAtNow(chatRoomInfo.updateAt),
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w300,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Container(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        chatRoomInfo.resentMessage,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black54,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
+                      );
+                    },
+                  );
           },
         ),
       ),
     );
   }
 
-  String fromAtNow(DateTime date) {
+  String _fromAtNow(DateTime date) {
     final Duration difference = DateTime.now().difference(date);
     final int sec = difference.inSeconds;
     final String thisYear = DateFormat('yyyy').format(DateTime.now());

@@ -8,4 +8,6 @@ class MyFriends {
 
   String usersId;
   DocumentReference usersRef;
+  String usersName;
+  String imageURL;
 }
