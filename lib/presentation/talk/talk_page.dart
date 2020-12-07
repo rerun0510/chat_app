@@ -7,11 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TalkPage extends StatelessWidget {
-  TalkPage({this.roomName, this.chatRoomInfo, this.users});
+  TalkPage(this.chatRoomInfo, this.users);
 
-  final String roomName;
   final ChatRoomInfo chatRoomInfo;
   final Users users;
+
   final messageAreaController = TextEditingController();
 
   GlobalKey globalKey = GlobalKey();
@@ -26,9 +26,11 @@ class TalkPage extends StatelessWidget {
         appBar: AppBar(
           leading: IconButton(
             icon: Icon(Icons.arrow_back_ios),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
           ),
-          title: Text(roomName),
+          title: Text(chatRoomInfo.roomName),
         ),
         body: Consumer<TalkModel>(
           builder: (context, model, child) {
@@ -125,70 +127,71 @@ class TalkPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onLongPress: () async {
-                      // RenderBox box =
-                      //     globalKey.currentContext.findRenderObject();
-                      // print("ウィジェットのサイズ :${box.size}");
-                      // print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
-                      int selected = await showMenu(
-                        position:
-                            RelativeRect.fromLTRB(60.0, 40.0, 100.0, 100.0),
-                        context: context,
-                        items: [
-                          PopupMenuItem(
-                            value: 0,
-                            child: Row(
-                              children: [
-                                Icon(Icons.edit),
-                                Text('編集'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 1,
-                            child: Row(
-                              children: [
-                                Icon(Icons.delete),
-                                Text('削除'),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                      if (selected == 0) {
-                        await _updateMessage(messages, model, context);
-                      } else if (selected == 1) {
-                        await _deleteMessage(messages, model, context);
-                      }
-                    },
+                  // GestureDetector(
+                  //   onLongPress: () async {
+                  //     // RenderBox box =
+                  //     //     globalKey.currentContext.findRenderObject();
+                  //     // print("ウィジェットのサイズ :${box.size}");
+                  //     // print("ウィジェットの位置 :${box.localToGlobal(Offset.zero)}");
+                  //     int selected = await showMenu(
+                  //       position:
+                  //           RelativeRect.fromLTRB(60.0, 40.0, 100.0, 100.0),
+                  //       context: context,
+                  //       items: [
+                  //         PopupMenuItem(
+                  //           value: 0,
+                  //           child: Row(
+                  //             children: [
+                  //               Icon(Icons.edit),
+                  //               Text('編集'),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //         PopupMenuItem(
+                  //           value: 1,
+                  //           child: Row(
+                  //             children: [
+                  //               Icon(Icons.delete),
+                  //               Text('削除'),
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     );
+                  //     if (selected == 0) {
+                  //       await _updateMessage(messages, model, context);
+                  //     } else if (selected == 1) {
+                  //       await _deleteMessage(messages, model, context);
+                  //     }
+                  //   },
+                  //   child: Container(
+                  Container(
+                    alignment: Alignment.topRight,
                     child: Container(
-                      alignment: Alignment.topRight,
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.80,
-                        ),
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(15),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                              )
-                            ]),
-                        child: Text(
-                          messages.message,
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.of(context).size.width * 0.80,
+                      ),
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                            )
+                          ]),
+                      child: Text(
+                        messages.message,
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
                       ),
                     ),
                   ),
+                  // ),
                 ],
               ),
             ],

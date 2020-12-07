@@ -37,12 +37,12 @@ class TalkModel extends ChangeNotifier {
     });
   }
 
-  setMessage(String text) {
+  void setMessage(String text) {
     message = text;
     notifyListeners();
   }
 
-  setUpdateFlg(bool updateFlg) {
+  void setUpdateFlg(bool updateFlg) {
     this.updateFlg = updateFlg;
     notifyListeners();
   }
@@ -73,6 +73,7 @@ class TalkModel extends ChangeNotifier {
         {
           'updateAt': createdAt,
           'resentMessage': message,
+          'visible': true,
         },
       );
     }

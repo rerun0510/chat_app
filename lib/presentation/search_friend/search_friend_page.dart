@@ -1,5 +1,6 @@
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/search_friend/search_friend_model.dart';
+import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -15,90 +16,113 @@ class SearchFriendPage extends StatelessWidget {
       create: (_) => SearchFriendModel(),
       child: Consumer<SearchFriendModel>(
         builder: (context, model, child) {
-          return Stack(
-            children: [
-              Container(
-                // height: MediaQuery.of(context).size.height * 0.85,
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: Text('友達検索'),
-                  ),
-                  body: Container(
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 30,
-                        ),
-                        _searchBox(controller, model, context),
-                        SizedBox(
-                          height: 80,
-                        ),
-                        Center(
-                          child: model.searchedFlg
-                              ? model.isSearchLoading
-                                  ? Container(
-                                      child: Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    )
-                                  : model.users != null
-                                      ? Column(
-                                          children: [
-                                            Padding(
-                                              padding:
-                                                  const EdgeInsets.all(8.0),
-                                              child: _userImage(model, context),
-                                            ),
-                                            Text(
-                                              model.users.name != null
-                                                  ? model.users.name
-                                                  : '',
-                                              style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            Container(
-                                              child: model.users.userId !=
-                                                      users.userId
-                                                  ? model.isAlreadyFriend
-                                                      ? Text('友達に登録済みです。')
-                                                      : _addFriendBtn(
-                                                          model, context)
-                                                  : Text('自分自身を追加することはできません。'),
-                                            ),
-                                          ],
-                                        )
-                                      : Text(
-                                          '入力したメールアドレスのユーザーは存在しません。',
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                          ),
-                                        )
-                              : null,
+          return Container(
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: Stack(
+              children: [
+                Container(
+                  child: Scaffold(
+                    appBar: AppBar(
+                      leading: Container(),
+                      title: Text('友達検索'),
+                      actions: [
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Icon(
+                            Icons.clear,
+                          ),
                         ),
                       ],
                     ),
+                    body: Container(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: 30,
+                          ),
+                          _searchBox(controller, model, context),
+                          SizedBox(
+                            height: 80,
+                          ),
+                          Center(
+                            child: model.searchedFlg
+                                ? model.isSearchLoading
+                                    ? Container(
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                    : model.users != null
+                                        ? Column(
+                                            children: [
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child:
+                                                    _userImage(model, context),
+                                              ),
+                                              Text(
+                                                model.users.name != null
+                                                    ? model.users.name
+                                                    : '',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Container(
+                                                child: model.users.userId !=
+                                                        users.userId
+                                                    ? model.isAlreadyFriend
+                                                        ? Column(
+                                                            children: [
+                                                              Text(model
+                                                                      .isAddedFlg
+                                                                  ? '新しい友達とトークしよう！'
+                                                                  : '友達に登録済みです。'),
+                                                              _talkBtn(model,
+                                                                  context),
+                                                            ],
+                                                          )
+                                                        : _addFriendBtn(
+                                                            model, context)
+                                                    : Text(
+                                                        '自分自身を追加することはできません。'),
+                                              ),
+                                            ],
+                                          )
+                                        : Text(
+                                            '入力したメールアドレスのユーザーは存在しません。',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                            ),
+                                          )
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                  child: model.isAddLoading
-                      ? Container(
-                          color: Colors.grey.withOpacity(0.8),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : null),
-            ],
+                Container(
+                    child: model.isAddLoading
+                        ? Container(
+                            color: Colors.grey.withOpacity(0.8),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : null),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
+  /// 検索ボックス
   Widget _searchBox(TextEditingController controller, SearchFriendModel model,
       BuildContext context) {
     return Container(
@@ -162,6 +186,7 @@ class SearchFriendPage extends StatelessWidget {
     );
   }
 
+  /// ユーザーのアイコン
   Widget _userImage(SearchFriendModel model, BuildContext context) {
     return ClipOval(
       child: model.users.imageURL != null
@@ -184,6 +209,7 @@ class SearchFriendPage extends StatelessWidget {
     );
   }
 
+  /// 友達追加ボタン
   Widget _addFriendBtn(SearchFriendModel model, BuildContext context) {
     return Container(
       child: Padding(
@@ -205,7 +231,6 @@ class SearchFriendPage extends StatelessWidget {
             ),
             onPressed: () async {
               await model.addFriend(users);
-              Navigator.of(context).pop();
             },
           ),
         ),
@@ -213,6 +238,7 @@ class SearchFriendPage extends StatelessWidget {
     );
   }
 
+  /// トーク画面遷移ボタン（未実装）
   Widget _talkBtn(SearchFriendModel model, BuildContext context) {
     return Container(
       child: Padding(
@@ -234,6 +260,16 @@ class SearchFriendPage extends StatelessWidget {
             ),
             onPressed: () async {
               // TODO トーク画面へ遷移
+              Navigator.of(context).pop();
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TalkPage(
+                    model.chatRoomInfo,
+                    users,
+                  ),
+                ),
+              );
             },
           ),
         ),

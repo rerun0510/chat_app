@@ -42,6 +42,7 @@ class TalkListModel extends ChangeNotifier {
         .collection('users')
         .doc(userId)
         .collection('chatRoomInfo')
+        .where('visible', isEqualTo: true)
         .orderBy('updateAt', descending: true)
         .snapshots();
     snapshot.listen((snapshot) {

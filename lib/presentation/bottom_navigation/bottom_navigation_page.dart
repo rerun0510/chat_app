@@ -1,30 +1,22 @@
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/bottom_navigation/bottom_navigation_model.dart';
 import 'package:chat_app/presentation/home/home_page.dart';
+import 'package:chat_app/presentation/home/home_page_appBar.dart';
 import 'package:chat_app/presentation/talk_list/talk_list_page.dart';
+import 'package:chat_app/presentation/talk_list/talk_list_page_appBar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigationPage extends StatelessWidget {
-  List<Widget> _pageList = <Widget>[
-    TalkListPage(),
-    HomePage(),
-  ];
-
-  BottomNavigationPage({this.users});
+  BottomNavigationPage(this.users);
   final Users users;
   @override
   Widget build(BuildContext context) {
-    _pageList[0] = HomePage(users: users);
-    _pageList[1] = TalkListPage(users: users);
     return ChangeNotifierProvider<BottomNavigationModel>(
       create: (_) => BottomNavigationModel()..init(),
       child: Consumer<BottomNavigationModel>(builder: (context, model, child) {
         return Scaffold(
-          // appBar: AppBar(
-          //   title: Text(''),
-          // ),
-          // body: _pageList[model.currentIndex],
+          appBar: _topPageAppBar(context),
           body: _topPageBody(context),
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: Colors.white,
@@ -65,5 +57,20 @@ class BottomNavigationPage extends StatelessWidget {
       maintainState: true,
       child: page,
     );
+  }
+
+  AppBar _topPageAppBar(BuildContext context) {
+    final model = Provider.of<BottomNavigationModel>(context);
+    final currentIndex = model.currentIndex;
+    AppBar appBar;
+    switch (currentIndex) {
+      case 0:
+        appBar = HomePageAppBar().getAppBar(context, users);
+        break;
+      case 1:
+        appBar = TalkListPageAppBar().getAppBar();
+        break;
+    }
+    return appBar;
   }
 }

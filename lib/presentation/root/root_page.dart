@@ -41,7 +41,7 @@ class RootPage extends StatelessWidget {
       if (debug) {
         return SignInPage();
       } else {
-        return BottomNavigationPage(users: users);
+        return BottomNavigationPage(users);
       }
     }
   }

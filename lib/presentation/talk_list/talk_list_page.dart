@@ -16,9 +16,6 @@ class TalkListPage extends StatelessWidget {
     return ChangeNotifierProvider<TalkListModel>(
       create: (_) => TalkListModel(users.userId),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text('トーク'),
-        ),
         body: Consumer<TalkListModel>(
           builder: (context, model, child) {
             return model.isLoading
@@ -38,10 +35,8 @@ class TalkListPage extends StatelessWidget {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TalkPage(
-                                  roomName: chatRoomInfo.roomName,
-                                  chatRoomInfo: chatRoomInfo,
-                                  users: users),
+                              builder: (context) =>
+                                  TalkPage(chatRoomInfo, users),
                             ),
                           );
                         },

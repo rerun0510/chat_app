@@ -107,7 +107,7 @@ class SignUpPage extends StatelessWidget {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => BottomNavigationPage(
-                                      users: model.users,
+                                      model.users,
                                     ),
                                   ),
                                 );

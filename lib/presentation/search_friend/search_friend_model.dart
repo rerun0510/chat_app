@@ -1,3 +1,4 @@
+import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -10,23 +11,26 @@ class SearchFriendModel extends ChangeNotifier {
   bool isAddLoading = false;
   bool searchedFlg = false;
   bool isAlreadyFriend = false;
+  bool isAddedFlg = false;
 
-  startSearchLoading() {
+  ChatRoomInfo chatRoomInfo;
+
+  void startSearchLoading() {
     this.isSearchLoading = true;
     notifyListeners();
   }
 
-  endSearchLoading() {
+  void endSearchLoading() {
     this.isSearchLoading = false;
     notifyListeners();
   }
 
-  startAddLoading() {
+  void startAddLoading() {
     this.isAddLoading = true;
     notifyListeners();
   }
 
-  endAddLoading() {
+  void endAddLoading() {
     this.isAddLoading = false;
     notifyListeners();
   }
@@ -46,9 +50,15 @@ class SearchFriendModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _init() {
+    this.isAddedFlg = false;
+    this.chatRoomInfo = null;
+  }
+
   Future searchFriend(Users users) async {
     this.searchedFlg = true;
     startSearchLoading();
+    _init();
     try {
       // ユーザー情報を取得
       final docs = await FirebaseFirestore.instance
@@ -58,21 +68,24 @@ class SearchFriendModel extends ChangeNotifier {
       // emailは一意のキーとなっている前提
       if (docs.size != 0) {
         this.users = Users(docs.docs[0]);
+        // 既に友達に追加されているかを確認
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(users.userId)
+            .collection('friends')
+            .doc(this.users.userId)
+            .get();
+        if (doc.exists) {
+          isAlreadyFriend = true;
+
+          // 検索後のトーク画面遷移用
+          final chatRoomInfoRef = doc['chatRoomInfoRef'];
+          await setChatRoomInfo(chatRoomInfoRef);
+        } else {
+          isAlreadyFriend = false;
+        }
       } else {
         this.users = null;
-      }
-
-      // 既に友達に追加されているかを確認
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(users.userId)
-          .collection('friends')
-          .doc(this.users.userId)
-          .get();
-      if (doc.exists) {
-        isAlreadyFriend = true;
-      } else {
-        isAlreadyFriend = false;
       }
     } catch (e) {
       print(e);
@@ -84,24 +97,118 @@ class SearchFriendModel extends ChangeNotifier {
 
   Future addFriend(Users users) async {
     startAddLoading();
+    _init();
     try {
-      final doc =
+      // 自分と相手の'/users/(UserId)'を定義
+      final usersRef =
+          FirebaseFirestore.instance.collection('users').doc(users.userId);
+      final friendUsersRef =
           FirebaseFirestore.instance.collection('users').doc(this.users.userId);
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(users.userId)
-          .collection('friends')
-          .doc(this.users.userId)
-          .set(
-        {
-          'usersRef': doc,
-        },
-      );
+      // 登録相手の友達情報に自分が存在するかを確認
+      final friendRef = friendUsersRef.collection('friends').doc(users.userId);
+      final createRoomFlg = await friendRef.get();
+
+      if (!createRoomFlg.exists) {
+        // 存在しない場合(相互に友達登録されていない)は新規でchatRoomを作成
+
+        // '/chatRoom/(ルームID)'を新規作成
+        final roomRef =
+            await FirebaseFirestore.instance.collection('chatRoom').add({
+          'groupFlg': false,
+          'groupId': '',
+        });
+
+        // '/chatRoom/(ルームID)/member/'を定義
+        final roomMemberRef = roomRef.collection('member');
+        // 自分と相手を追加
+        await roomMemberRef.doc(users.userId).set({
+          'usersRef': usersRef,
+        });
+        await roomMemberRef.doc(this.users.userId).set({
+          'usersRef': friendUsersRef,
+        });
+
+        // '/users/(ユーザーID)/chatRoomInfo/(ルームID)/'へデータを追加
+        String initResentMessage = '';
+        final chatRoomInfoRef =
+            usersRef.collection('chatRoomInfo').doc(roomRef.id);
+        await chatRoomInfoRef.set({
+          'roomRef': roomRef,
+          'resentMessage': initResentMessage,
+          'updateAt': Timestamp.now(),
+          'visible': true,
+        });
+        await friendUsersRef.collection('chatRoomInfo').doc(roomRef.id).set({
+          'roomRef': roomRef,
+          'resentMessage': initResentMessage,
+          'updateAt': Timestamp.now(),
+          'visible': false,
+        });
+
+        // '/users/(自分のユーザーID)/friend/'に登録相手のユーザー情報を追加
+        await usersRef.collection('friends').doc(this.users.userId).set(
+          {
+            'usersRef': friendUsersRef,
+            'chatRoomInfoRef':
+                usersRef.collection('chatRoomInfo').doc(roomRef.id),
+          },
+        );
+
+        // 登録完了後のトーク画面遷移用
+        await setChatRoomInfo(chatRoomInfoRef);
+      } else {
+        // 相手が既に自分を友達登録している場合
+
+        // '/chatRoom/(ルームID)'を取得
+        final doc = await friendRef.get();
+        final roomId = doc['chatRoomInfoRef'].id;
+
+        // '/users/(自分のユーザーID)/friend/'に登録相手のユーザー情報を追加
+        final chatRoomInfoRef = usersRef.collection('chatRoomInfo').doc(roomId);
+        await usersRef.collection('friends').doc(this.users.userId).set(
+          {
+            'usersRef': friendUsersRef,
+            'chatRoomInfoRef': chatRoomInfoRef,
+          },
+        );
+
+        // chatRoomInfoのVisibleを更新
+        // メッセージの有無で更新方法を分岐
+        final snapshot = await FirebaseFirestore.instance
+            .collection('chatRoom')
+            .doc(roomId)
+            .collection('messages')
+            .get();
+        if (snapshot.docs.length == 0) {
+          await chatRoomInfoRef.update({
+            'updateAt': Timestamp.now(),
+            'visible': true,
+          });
+        } else {
+          await chatRoomInfoRef.update({
+            'visible': true,
+          });
+        }
+
+        // 登録完了後のトーク画面遷移用
+        await setChatRoomInfo(chatRoomInfoRef);
+      }
+      isAlreadyFriend = true;
+      isAddedFlg = true;
+      notifyListeners();
     } catch (e) {
       print(e);
+      throw ('エラーが発生しました');
     } finally {
       endAddLoading();
     }
+  }
+
+  /// トーク画面遷移用のchatRoomInfoを設定
+  Future setChatRoomInfo(DocumentReference chatRoomInfoRef) async {
+    this.chatRoomInfo = ChatRoomInfo(await chatRoomInfoRef.get());
+    this.chatRoomInfo.roomName = this.users.name;
+    this.chatRoomInfo.imageURL = this.users.imageURL;
   }
 }
