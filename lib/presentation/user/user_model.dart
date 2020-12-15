@@ -4,9 +4,17 @@ import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/myGroups.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserModel extends ChangeNotifier {
+  UserModel(MyGroups myGroups, MyFriends myFriends) {
+    _init(myGroups, myFriends);
+  }
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Users currentUser;
   bool isLoading = false;
   String name = '';
   String imageURL = '';
@@ -14,26 +22,36 @@ class UserModel extends ChangeNotifier {
 
   ChatRoomInfo chatRoomInfo;
 
-  UserModel(Users users, MyGroups myGroups, MyFriends myFriends) {
-    _init(users, myGroups, myFriends);
-  }
-
-  Future _init(Users users, MyGroups myGroups, MyFriends myFriends) async {
+  Future _init(MyGroups myGroups, MyFriends myFriends) async {
     startLoading();
-    if (myGroups != null) {
-      this.name = myGroups.groupsName;
-      this.imageURL = myGroups.imageURL;
-      fetchChatRoomInfo(myGroups.chatRoomInfoRef, users);
-    } else if (myFriends != null) {
-      this.name = myFriends.usersName;
-      this.imageURL = myFriends.imageURL;
-      fetchChatRoomInfo(myFriends.chatRoomInfoRef, users);
-    } else {
-      this.name = users.name;
-      this.imageURL = users.imageURL;
-      this.isMe = true;
+    try {
+      // 自分のユーザー情報を取得
+      final firebaseUser = auth.currentUser;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+      this.currentUser = Users(doc);
+
+      if (myGroups != null) {
+        this.name = myGroups.groupsName;
+        this.imageURL = myGroups.imageURL;
+        fetchChatRoomInfo(myGroups.chatRoomInfoRef, this.currentUser);
+      } else if (myFriends != null) {
+        this.name = myFriends.usersName;
+        this.imageURL = myFriends.imageURL;
+        fetchChatRoomInfo(myFriends.chatRoomInfoRef, this.currentUser);
+      } else {
+        this.name = this.currentUser.name;
+        this.imageURL = this.currentUser.imageURL;
+        this.isMe = true;
+      }
+    } catch (e) {
+      print(e);
+      throw ('エラーが発生しました');
+    } finally {
+      endLoading();
     }
-    endLoading();
   }
 
   void startLoading() {

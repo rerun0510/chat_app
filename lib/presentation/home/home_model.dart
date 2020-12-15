@@ -2,22 +2,34 @@ import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/myGroups.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class HomeModel extends ChangeNotifier {
   List<MyGroups> myGroupsList = [];
   List<MyFriends> myFriendsList = [];
 
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  Users currentUser;
+
   bool isLoading = false;
 
-  HomeModel(Users users) {
-    _init(users);
+  HomeModel() {
+    _init();
   }
 
-  Future _init(Users users) async {
+  Future _init() async {
     this.startLoading();
     try {
-      await fetchHomeInfo(users);
+      // 自分のユーザー情報を取得
+      final firebaseUser = auth.currentUser;
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+      this.currentUser = Users(doc);
+
+      await fetchHomeInfo();
     } catch (e) {
       print(e);
       throw ('エラーが発生しました');
@@ -37,11 +49,18 @@ class HomeModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future fetchHomeInfo(Users users) async {
+  Future fetchHomeInfo() async {
     // グループリスト取得
+    fetchGroups();
+    // 友達リスト取得
+    fetchFriends();
+  }
+
+  /// グループリスト取得
+  void fetchGroups() {
     final groups = FirebaseFirestore.instance
         .collection('users')
-        .doc(users.userId)
+        .doc(this.currentUser.userId)
         .collection('groups')
         .snapshots();
     groups.listen((snapshot) {
@@ -60,12 +79,15 @@ class HomeModel extends ChangeNotifier {
       }
       notifyListeners();
     });
+  }
 
-    // 友達リスト取得
+  /// 友達リスト取得
+  void fetchFriends() {
     final friends = FirebaseFirestore.instance
         .collection('users')
-        .doc(users.userId)
+        .doc(this.currentUser.userId)
         .collection('friends')
+        .where('friendFlg', isEqualTo: true)
         .snapshots();
     friends.listen((snapshot) {
       final docs = snapshot.docs;

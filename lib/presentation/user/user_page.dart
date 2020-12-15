@@ -7,16 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatelessWidget {
-  UserPage(this.users, this.myGroups, this.myFriends);
+  UserPage(this.myGroups, this.myFriends);
 
-  final Users users;
   final MyFriends myFriends;
   final MyGroups myGroups;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<UserModel>(
-      create: (_) => UserModel(users, myGroups, myFriends),
+      create: (_) => UserModel(myGroups, myFriends),
       child: Consumer<UserModel>(
         builder: (context, model, child) {
           return Container(
@@ -91,7 +90,7 @@ class UserPage extends StatelessWidget {
                                                       builder: (context) =>
                                                           TalkPage(
                                                         model.chatRoomInfo,
-                                                        users,
+                                                        model.currentUser,
                                                       ),
                                                     ),
                                                   );
@@ -133,12 +132,12 @@ class UserPage extends StatelessWidget {
       child: model.imageURL != null
           ? Image.network(
               model.imageURL,
-              errorBuilder: (context, object, stackTrace) {
-                return Icon(
-                  Icons.account_circle,
-                  size: 125,
-                );
-              },
+              // errorBuilder: (context, object, stackTrace) {
+              //   return Icon(
+              //     Icons.account_circle,
+              //     size: 125,
+              //   );
+              // },
               width: 125,
               height: 125,
               fit: BoxFit.cover,

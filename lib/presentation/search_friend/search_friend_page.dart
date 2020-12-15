@@ -5,10 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SearchFriendPage extends StatelessWidget {
-  SearchFriendPage(this.users);
-
-  final Users users;
-
   @override
   Widget build(BuildContext context) {
     final controller = TextEditingController();
@@ -17,17 +13,20 @@ class SearchFriendPage extends StatelessWidget {
       child: Consumer<SearchFriendModel>(
         builder: (context, model, child) {
           return Container(
-            height: MediaQuery.of(context).size.height * 0.9,
             child: Stack(
               children: [
                 Container(
                   child: Scaffold(
                     appBar: AppBar(
-                      leading: Container(),
+                      leading: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(Icons.arrow_back_ios),
+                      ),
                       title: Text('友達検索'),
                       actions: [
                         IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () =>
+                              Navigator.of(context, rootNavigator: true).pop(),
                           icon: Icon(
                             Icons.clear,
                           ),
@@ -73,7 +72,7 @@ class SearchFriendPage extends StatelessWidget {
                                               ),
                                               Container(
                                                 child: model.users.userId !=
-                                                        users.userId
+                                                        model.currentUser.userId
                                                     ? model.isAlreadyFriend
                                                         ? Column(
                                                             children: [
@@ -176,7 +175,7 @@ class SearchFriendPage extends StatelessWidget {
               ),
               onPressed: model.email.isNotEmpty
                   ? () async {
-                      await model.searchFriend(users);
+                      await model.searchFriend();
                     }
                   : null,
             ),
@@ -230,7 +229,7 @@ class SearchFriendPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             onPressed: () async {
-              await model.addFriend(users);
+              await model.addFriend();
             },
           ),
         ),
@@ -266,7 +265,7 @@ class SearchFriendPage extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => TalkPage(
                     model.chatRoomInfo,
-                    users,
+                    model.currentUser,
                   ),
                 ),
               );

@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
-      create: (_) => HomeModel(users),
+      create: (_) => HomeModel(),
       child: Scaffold(
         body: Consumer<HomeModel>(
           builder: (context, model, child) {
@@ -30,12 +30,22 @@ class HomePage extends StatelessWidget {
                         ),
                         ExpansionTile(
                           initiallyExpanded: false,
-                          title: Text('グループ $groupsCnt'),
+                          title: Row(
+                            children: [
+                              Icon(Icons.group),
+                              Text(' グループ $groupsCnt')
+                            ],
+                          ),
                           children: _groupListTile(model, context),
                         ),
                         ExpansionTile(
                           initiallyExpanded: false,
-                          title: Text('友達 $friendsCnt'),
+                          title: Row(
+                            children: [
+                              Icon(Icons.person),
+                              Text(' 友達 $friendsCnt'),
+                            ],
+                          ),
                           children: _friendListTile(model, context),
                         ),
                       ],
@@ -54,7 +64,7 @@ class HomePage extends StatelessWidget {
         await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) => UserPage(users, null, null),
+          builder: (context) => UserPage(null, null),
         );
       },
       child: Container(
@@ -115,7 +125,7 @@ class HomePage extends StatelessWidget {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(users, group, null),
+                builder: (context) => UserPage(group, null),
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
@@ -168,7 +178,7 @@ class HomePage extends StatelessWidget {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(users, null, friend),
+                builder: (context) => UserPage(null, friend),
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),

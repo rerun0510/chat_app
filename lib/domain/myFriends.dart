@@ -5,11 +5,13 @@ class MyFriends {
     usersId = doc.id;
     usersRef = doc['usersRef'];
     chatRoomInfoRef = doc['chatRoomInfoRef'];
+    friendFlg = doc['friendFlg'];
   }
 
   String usersId;
   DocumentReference usersRef;
   DocumentReference chatRoomInfoRef;
+  bool friendFlg;
   String usersName;
   String imageURL;
 }

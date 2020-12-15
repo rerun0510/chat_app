@@ -5,11 +5,13 @@ class MyGroups {
     groupsId = doc.id;
     groupsRef = doc['groupsRef'];
     chatRoomInfoRef = doc['chatRoomInfoRef'];
+    memberFlg = doc['memberFlg'];
   }
 
   String groupsId;
   DocumentReference groupsRef;
   DocumentReference chatRoomInfoRef;
+  bool memberFlg;
   String groupsName;
   String imageURL;
 }
