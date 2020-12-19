@@ -5,9 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
-  HomePage({this.users});
-  final Users users;
-
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<HomeModel>(
       create: (_) => HomeModel(),
@@ -26,7 +24,7 @@ class HomePage extends StatelessWidget {
                     child: ListView(
                       children: [
                         Container(
-                          child: _myAccount(users, context),
+                          child: _myAccount(model.currentUser, context),
                         ),
                         ExpansionTile(
                           initiallyExpanded: false,
@@ -80,12 +78,12 @@ class HomePage extends StatelessWidget {
                 child: users.imageURL != null
                     ? Image.network(
                         users.imageURL,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 55,
-                          );
-                        },
+                        // errorBuilder: (context, object, stackTrace) {
+                        //   return Icon(
+                        //     Icons.account_circle,
+                        //     size: 55,
+                        //   );
+                        // },
                         width: 55,
                         height: 55,
                         fit: BoxFit.cover,

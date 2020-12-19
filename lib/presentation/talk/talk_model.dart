@@ -2,15 +2,27 @@ import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/member.dart';
 import 'package:chat_app/domain/messages.dart';
 import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TalkModel extends ChangeNotifier {
+  TalkModel(ChatRoomInfo chatRoomInfo) {
+    _init(chatRoomInfo);
+  }
+
   List<Messages> messages = [];
   List<Member> memberList = [];
   List<Users> usersList = [];
   String message = '';
   bool updateFlg = true;
+  Users currentUser;
+
+  Future _init(ChatRoomInfo chatRoomInfo) async {
+    // currentUser取得
+    this.currentUser = await fetchCurrentUser();
+    fetchMessages(chatRoomInfo);
+  }
 
   Future fetchMessages(ChatRoomInfo chatRoomInfo) async {
     final members = await chatRoomInfo.roomRef.collection('member').get();

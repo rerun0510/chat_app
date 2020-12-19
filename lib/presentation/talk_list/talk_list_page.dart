@@ -1,5 +1,4 @@
 import 'package:chat_app/domain/chatRoomInfo.dart';
-import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:chat_app/presentation/talk_list/talk_list_model.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +7,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TalkListPage extends StatelessWidget {
-  TalkListPage({this.users});
-  final Users users;
-
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<TalkListModel>(
-      create: (_) => TalkListModel(users.userId),
+      create: (_) => TalkListModel(),
       child: Scaffold(
         body: Consumer<TalkListModel>(
           builder: (context, model, child) {
@@ -35,8 +31,7 @@ class TalkListPage extends StatelessWidget {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  TalkPage(chatRoomInfo, users),
+                              builder: (context) => TalkPage(chatRoomInfo),
                             ),
                           );
                         },

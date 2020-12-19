@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -11,7 +12,7 @@ class SignUpModel extends ChangeNotifier {
   String name;
   File imageFile;
   bool isLoading = false;
-  Users users;
+  Users currentUser;
 
   startLoading() {
     isLoading = true;
@@ -47,12 +48,8 @@ class SignUpModel extends ChangeNotifier {
       },
     );
 
-    // FirestoreからUsersを取得
-    final docs = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(currentUser.uid)
-        .get();
-    this.users = Users(docs);
+    // currentUser取得
+    this.currentUser = await fetchCurrentUser();
   }
 
   Future<String> _uploadImage(User currentUser) async {

@@ -1,23 +1,34 @@
+import 'package:chat_app/presentation/create_group/create_group_page.dart';
 import 'package:chat_app/presentation/selectFriends/select_friends_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SelectFriendsPage extends StatelessWidget {
+  @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<SelectFriendsModel>(
       create: (_) => SelectFriendsModel(),
       child: Consumer<SelectFriendsModel>(builder: (context, model, child) {
         final int friendsCnt = model.myFriends.length;
+        final int selectCnt = model.selectedMyFriends.length;
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
               onPressed: () => Navigator.of(context).pop(),
               icon: Icon(Icons.arrow_back_ios),
             ),
-            title: Text('友達を選択'),
+            title: selectCnt == 0 ? Text('友達を選択') : Text('選択中 $selectCnt'),
             actions: [
               FlatButton(
-                onPressed: () {},
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CreateGroupPage(model.selectedMyFriends),
+                    ),
+                  );
+                },
                 child: Text(
                   '次へ',
                   style: TextStyle(
@@ -58,6 +69,14 @@ class SelectFriendsPage extends StatelessWidget {
                                 final Map friend = model.myFriends[index];
                                 return Container(
                                   padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        width: 1,
+                                        color: Colors.grey.withOpacity(0.5),
+                                      ),
+                                    ),
+                                  ),
                                   child: CheckboxListTile(
                                     title: Container(
                                       width: MediaQuery.of(context).size.width *

@@ -7,13 +7,9 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TalkPage extends StatelessWidget {
-  TalkPage(this.chatRoomInfo, this.users);
-
+  TalkPage(this.chatRoomInfo);
   final ChatRoomInfo chatRoomInfo;
-  final Users users;
-
   final messageAreaController = TextEditingController();
-
   GlobalKey globalKey = GlobalKey();
 
   @override
@@ -21,7 +17,7 @@ class TalkPage extends StatelessWidget {
     bool isSameUser;
     bool isAnotherDay;
     return ChangeNotifierProvider<TalkModel>(
-      create: (_) => TalkModel()..fetchMessages(chatRoomInfo),
+      create: (_) => TalkModel(chatRoomInfo),
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -44,8 +40,8 @@ class TalkPage extends StatelessWidget {
                     itemBuilder: (BuildContext context, int index) {
                       final Messages messages = model.messages[index];
 
-                      final bool isMe =
-                          model.messages[index].userId == users.userId;
+                      final bool isMe = model.messages[index].userId ==
+                          model.currentUser.userId;
 
                       if (index < model.messages.length - 1) {
                         // 次のデータと比較する
@@ -366,7 +362,7 @@ class TalkPage extends StatelessWidget {
 
   Future _sendMessage(TalkModel model, BuildContext context) async {
     try {
-      await model.sendMessage(chatRoomInfo.roomId, users.userId);
+      await model.sendMessage(chatRoomInfo.roomId, model.currentUser.userId);
     } catch (e) {
       showDialog(
         context: context,

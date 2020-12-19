@@ -1,7 +1,15 @@
+import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:flutter/material.dart';
 
 class BottomNavigationModel extends ChangeNotifier {
-  Future init() async {
+  BottomNavigationModel() {
+    _init();
+  }
+  Users currentUser;
+
+  Future _init() async {
+    this.currentUser = await fetchCurrentUser();
     notifyListeners();
   }
 

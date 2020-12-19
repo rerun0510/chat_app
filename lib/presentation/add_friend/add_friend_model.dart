@@ -1,6 +1,7 @@
 import 'package:chat_app/domain/myFriends.dart';
+import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AddFriendModel extends ChangeNotifier {
@@ -8,13 +9,15 @@ class AddFriendModel extends ChangeNotifier {
     _init();
   }
 
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  Users currentUser;
   bool isLoading = false;
   List<MyFriends> myFriends = [];
 
   void _init() async {
     _startLoading();
     try {
+      // currentUser取得
+      this.currentUser = await fetchCurrentUser();
       await fetchMayBeFriend();
     } catch (e) {
       print(e);
@@ -35,10 +38,9 @@ class AddFriendModel extends ChangeNotifier {
   }
 
   Future fetchMayBeFriend() async {
-    final firebaseUser = auth.currentUser;
     final docs = await FirebaseFirestore.instance
         .collection('users')
-        .doc(firebaseUser.uid)
+        .doc(this.currentUser.userId)
         .collection('friends')
         .where('friendFlg', isEqualTo: false)
         .get();

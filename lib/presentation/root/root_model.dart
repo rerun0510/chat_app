@@ -1,16 +1,16 @@
 import 'package:chat_app/domain/users.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class RootModel extends ChangeNotifier {
-  User user;
-  Users users;
-
   RootModel() {
     _init();
   }
+
+  User user;
+  Users currentUser;
 
   bool isLoading = false;
 
@@ -22,7 +22,8 @@ class RootModel extends ChangeNotifier {
     try {
       getUser();
       if (user != null) {
-        await fetchUsers();
+        // currentUser取得
+        this.currentUser = await fetchCurrentUser();
       }
     } catch (e) {
       print(e);
@@ -35,14 +36,6 @@ class RootModel extends ChangeNotifier {
 
   void getUser() {
     user = FirebaseAuth.instance.currentUser;
-  }
-
-  Future fetchUsers() async {
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .get();
-    this.users = Users(doc);
   }
 
   startLoading() {

@@ -1,6 +1,4 @@
-import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/search_friend/search_friend_model.dart';
-import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -157,7 +155,6 @@ class SearchFriendPage extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     onPressed: () {
-                      print(model.email);
                       controller.clear();
                       model.clearEmail();
                     },
@@ -237,7 +234,7 @@ class SearchFriendPage extends StatelessWidget {
     );
   }
 
-  /// トーク画面遷移ボタン（未実装）
+  /// トーク画面遷移ボタン
   Widget _talkBtn(SearchFriendModel model, BuildContext context) {
     return Container(
       child: Padding(
@@ -259,16 +256,9 @@ class SearchFriendPage extends StatelessWidget {
             ),
             onPressed: () async {
               // TODO トーク画面へ遷移
-              Navigator.of(context).pop();
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TalkPage(
-                    model.chatRoomInfo,
-                    model.currentUser,
-                  ),
-                ),
-              );
+              // talk_page遷移用にChatRoomInfoを返却
+              Navigator.of(context, rootNavigator: true)
+                  .pop(model.chatRoomInfo);
             },
           ),
         ),

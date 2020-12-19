@@ -1,6 +1,5 @@
 import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/myGroups.dart';
-import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:chat_app/presentation/user/user_model.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +25,8 @@ class UserPage extends StatelessWidget {
                   child: Scaffold(
                     appBar: AppBar(
                       leading: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () =>
+                            Navigator.of(context, rootNavigator: true).pop(),
                         icon: Icon(
                           Icons.clear,
                         ),
@@ -83,15 +83,15 @@ class UserPage extends StatelessWidget {
                                                     Icons.textsms_outlined),
                                                 onPressed: () async {
                                                   // トーク画面に遷移
-                                                  Navigator.of(context).pop();
+                                                  Navigator.of(context,
+                                                          rootNavigator: false)
+                                                      .pop();
                                                   await Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (context) =>
-                                                          TalkPage(
-                                                        model.chatRoomInfo,
-                                                        model.currentUser,
-                                                      ),
+                                                          TalkPage(model
+                                                              .chatRoomInfo),
                                                     ),
                                                   );
                                                 },

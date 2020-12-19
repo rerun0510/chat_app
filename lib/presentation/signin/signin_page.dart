@@ -67,9 +67,7 @@ class SignInPage extends StatelessWidget {
           await Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BottomNavigationPage(
-                model.users,
-              ),
+              builder: (context) => BottomNavigationPage(),
             ),
           );
         }

@@ -3,16 +3,14 @@ import 'package:chat_app/domain/member.dart';
 import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/myGroups.dart';
 import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserModel extends ChangeNotifier {
   UserModel(MyGroups myGroups, MyFriends myFriends) {
     _init(myGroups, myFriends);
   }
-
-  final FirebaseAuth auth = FirebaseAuth.instance;
 
   Users currentUser;
   bool isLoading = false;
@@ -25,13 +23,8 @@ class UserModel extends ChangeNotifier {
   Future _init(MyGroups myGroups, MyFriends myFriends) async {
     startLoading();
     try {
-      // 自分のユーザー情報を取得
-      final firebaseUser = auth.currentUser;
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(firebaseUser.uid)
-          .get();
-      this.currentUser = Users(doc);
+      // currentUser取得
+      this.currentUser = await fetchCurrentUser();
 
       if (myGroups != null) {
         this.name = myGroups.groupsName;

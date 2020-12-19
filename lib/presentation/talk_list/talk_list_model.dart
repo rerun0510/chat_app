@@ -1,23 +1,27 @@
 import 'package:chat_app/domain/chatRoom.dart';
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/member.dart';
+import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class TalkListModel extends ChangeNotifier {
-  List<ChatRoomInfo> chatRoomInfoList = [];
-  List<ChatRoom> chatRoomList = [];
-
-  bool isLoading = false;
-
-  TalkListModel(String userId) {
-    _init(userId);
+  TalkListModel() {
+    _init();
   }
 
-  Future _init(String userId) async {
+  Users currentUser;
+  List<ChatRoomInfo> chatRoomInfoList = [];
+  List<ChatRoom> chatRoomList = [];
+  bool isLoading = false;
+
+  Future _init() async {
     this.startLoading();
     try {
-      await fetchTalkList(userId);
+      // currentUser取得
+      this.currentUser = await fetchCurrentUser();
+      await fetchTalkList();
     } catch (e) {
       print(e);
       throw ('エラーが発生しました');
@@ -37,10 +41,10 @@ class TalkListModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future fetchTalkList(String userId) async {
+  Future fetchTalkList() async {
     final snapshot = FirebaseFirestore.instance
         .collection('users')
-        .doc(userId)
+        .doc(this.currentUser.userId)
         .collection('chatRoomInfo')
         .where('visible', isEqualTo: true)
         .orderBy('updateAt', descending: true)
@@ -80,7 +84,7 @@ class TalkListModel extends ChangeNotifier {
               final docs = snapshot.docs;
               final memberList = docs.map((doc) => Member(doc)).toList();
               for (Member member in memberList) {
-                if (member.userId != userId) {
+                if (member.userId != this.currentUser.userId) {
                   final snapshot = member.usersRef.snapshots();
                   snapshot.listen((snapshot) {
                     final doc = snapshot.data();

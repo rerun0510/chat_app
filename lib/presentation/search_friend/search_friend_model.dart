@@ -1,17 +1,15 @@
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/users.dart';
+import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SearchFriendModel extends ChangeNotifier {
   SearchFriendModel() {
     _init();
   }
-  final FirebaseAuth auth = FirebaseAuth.instance;
 
   Users currentUser;
-
   Users users;
   String email = '';
   bool clearBtnFlg = false;
@@ -20,15 +18,14 @@ class SearchFriendModel extends ChangeNotifier {
   bool searchedFlg = false;
   bool isAlreadyFriend = false;
   bool isAddedFlg = false;
-
   ChatRoomInfo chatRoomInfo;
 
   Future _init() async {
-    // 自分のユーザー情報を取得
-    final firebaseUser = auth.currentUser;
+    // currentUser取得
+    this.currentUser = await fetchCurrentUser();
     final doc = await FirebaseFirestore.instance
         .collection('users')
-        .doc(firebaseUser.uid)
+        .doc(this.currentUser.userId)
         .get();
     this.currentUser = Users(doc);
   }

@@ -1,5 +1,4 @@
 import 'package:chat_app/presentation/bottom_navigation/bottom_navigation_page.dart';
-import 'package:chat_app/presentation/signin/signin_model.dart';
 import 'package:chat_app/presentation/signup/signup_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -106,9 +105,8 @@ class SignUpPage extends StatelessWidget {
                                 await Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => BottomNavigationPage(
-                                      model.users,
-                                    ),
+                                    builder: (context) =>
+                                        BottomNavigationPage(),
                                   ),
                                 );
                               },

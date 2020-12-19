@@ -1,4 +1,3 @@
-import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/bottom_navigation/bottom_navigation_model.dart';
 import 'package:chat_app/presentation/home/home_page.dart';
 import 'package:chat_app/presentation/home/home_page_appBar.dart';
@@ -8,12 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigationPage extends StatelessWidget {
-  BottomNavigationPage(this.users);
-  final Users users;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<BottomNavigationModel>(
-      create: (_) => BottomNavigationModel()..init(),
+      create: (_) => BottomNavigationModel(),
       child: Consumer<BottomNavigationModel>(builder: (context, model, child) {
         return Scaffold(
           appBar: _topPageAppBar(context),
@@ -45,8 +42,8 @@ class BottomNavigationPage extends StatelessWidget {
     final currentIndex = model.currentIndex;
     return Stack(
       children: [
-        _tabPage(currentIndex, 0, HomePage(users: users)),
-        _tabPage(currentIndex, 1, TalkListPage(users: users)),
+        _tabPage(currentIndex, 0, HomePage()),
+        _tabPage(currentIndex, 1, TalkListPage()),
       ],
     );
   }
@@ -65,7 +62,7 @@ class BottomNavigationPage extends StatelessWidget {
     AppBar appBar;
     switch (currentIndex) {
       case 0:
-        appBar = HomePageAppBar().getAppBar(context, users);
+        appBar = HomePageAppBar().getAppBar(context);
         break;
       case 1:
         appBar = TalkListPageAppBar().getAppBar();
