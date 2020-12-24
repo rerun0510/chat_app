@@ -129,15 +129,15 @@ class UserPage extends StatelessWidget {
   /// ユーザーのアイコン
   Widget _userImage(UserModel model, BuildContext context) {
     return ClipOval(
-      child: model.imageURL != null
+      child: model.imageURL != ''
           ? Image.network(
               model.imageURL,
-              // errorBuilder: (context, object, stackTrace) {
-              //   return Icon(
-              //     Icons.account_circle,
-              //     size: 125,
-              //   );
-              // },
+              errorBuilder: (context, object, stackTrace) {
+                return Icon(
+                  Icons.account_circle,
+                  size: 125,
+                );
+              },
               width: 125,
               height: 125,
               fit: BoxFit.cover,

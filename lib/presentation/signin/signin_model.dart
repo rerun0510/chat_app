@@ -10,12 +10,25 @@ class SignInModel extends ChangeNotifier {
 
   User currentUser;
   Users users;
+  bool isLoading = false;
+
+  startLoading() {
+    isLoading = true;
+    notifyListeners();
+  }
+
+  endLoading() {
+    isLoading = false;
+    notifyListeners();
+  }
 
   Future signInWithGoogle() async {
     //サインイン画面が表示
     final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
+
+    startLoading();
 
     //firebase側に登録
     final AuthCredential credential = GoogleAuthProvider.credential(
@@ -38,5 +51,7 @@ class SignInModel extends ChangeNotifier {
         .doc(this.currentUser.uid)
         .get();
     this.users = Users(docs);
+
+    endLoading();
   }
 }

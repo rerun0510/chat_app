@@ -6,7 +6,9 @@ import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CreateGroupModel extends ChangeNotifier {
   CreateGroupModel(List<Map> selectedMyFriends) {
@@ -23,15 +25,16 @@ class CreateGroupModel extends ChangeNotifier {
 
   _init(List<Map> selectedMyFriends) async {
     this.startLoading();
-
     try {
+      // デフォルトアイコンの設定
+      this.imageFile =
+          await getImageFileFromAssets('resources/group_young_world.png');
+
       // currentUser取得
       this.currentUser = await fetchCurrentUser();
       final ref = FirebaseFirestore.instance
           .collection('users')
           .doc(this.currentUser.userId);
-      final doc = await ref.get();
-      this.currentUser = Users(doc);
 
       // 選択したフレンドリストの先頭に自分を追加
       this.selectedMyFriends = selectedMyFriends.reversed.toList();
@@ -75,6 +78,19 @@ class CreateGroupModel extends ChangeNotifier {
     this.groupName = '';
     clearBtnFlg = false;
     notifyListeners();
+  }
+
+  /// 端末のテンポラリに画像を保存
+  Future<File> getImageFileFromAssets(String path) async {
+    final byteData = await rootBundle.load(path);
+    final tmp = await getTemporaryDirectory();
+    final tmpPath = tmp.path;
+    Directory('$tmpPath/resources').create();
+    final file = File('${(await getTemporaryDirectory()).path}/$path');
+    await file.writeAsBytes(byteData.buffer
+        .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+    return file;
   }
 
   /// ImagePicker

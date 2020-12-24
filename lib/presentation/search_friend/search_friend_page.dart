@@ -3,42 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class SearchFriendPage extends StatelessWidget {
+  SearchFriendPage(this.emailController);
+  final TextEditingController emailController;
   @override
   Widget build(BuildContext context) {
-    final controller = TextEditingController();
     return ChangeNotifierProvider<SearchFriendModel>(
       create: (_) => SearchFriendModel(),
       child: Consumer<SearchFriendModel>(
         builder: (context, model, child) {
-          return Container(
-            child: Stack(
-              children: [
-                Container(
-                  child: Scaffold(
-                    appBar: AppBar(
-                      leading: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.arrow_back_ios),
-                      ),
-                      title: Text('友達検索'),
-                      actions: [
-                        IconButton(
-                          onPressed: () =>
-                              Navigator.of(context, rootNavigator: true).pop(),
-                          icon: Icon(
-                            Icons.clear,
-                          ),
-                        ),
-                      ],
+          return Stack(
+            children: [
+              GestureDetector(
+                onTap: () => FocusScope.of(context).unfocus(),
+                child: Scaffold(
+                  appBar: AppBar(
+                    leading: IconButton(
+                      onPressed: () {
+                        emailController.clear();
+                        Navigator.of(context).pop();
+                      },
+                      icon: Icon(Icons.arrow_back_ios),
                     ),
-                    body: Container(
+                    title: Text('友達検索'),
+                    actions: [
+                      IconButton(
+                        onPressed: () =>
+                            Navigator.of(context, rootNavigator: true).pop(),
+                        icon: Icon(
+                          Icons.clear,
+                        ),
+                      ),
+                    ],
+                  ),
+                  body: SingleChildScrollView(
+                    reverse: true,
+                    child: Container(
                       padding: EdgeInsets.all(20),
                       child: Column(
                         children: [
                           SizedBox(
                             height: 30,
                           ),
-                          _searchBox(controller, model, context),
+                          _searchBox(model, context),
                           SizedBox(
                             height: 80,
                           ),
@@ -95,24 +101,25 @@ class SearchFriendPage extends StatelessWidget {
                                               fontSize: 15,
                                             ),
                                           )
-                                : null,
+                                : Container(),
                           ),
                         ],
                       ),
                     ),
                   ),
                 ),
-                Container(
-                    child: model.isAddLoading
-                        ? Container(
-                            color: Colors.grey.withOpacity(0.8),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        : null),
-              ],
-            ),
+              ),
+              Container(
+                child: model.isAddLoading
+                    ? Container(
+                        color: Colors.grey.withOpacity(0.8),
+                        child: Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    : null,
+              ),
+            ],
           );
         },
       ),
@@ -120,8 +127,7 @@ class SearchFriendPage extends StatelessWidget {
   }
 
   /// 検索ボックス
-  Widget _searchBox(TextEditingController controller, SearchFriendModel model,
-      BuildContext context) {
+  Widget _searchBox(SearchFriendModel model, BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
       decoration: BoxDecoration(
@@ -135,11 +141,28 @@ class SearchFriendPage extends StatelessWidget {
           Expanded(
             flex: 8,
             child: TextField(
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              onSubmitted: (newValue) async {
+                if (model.email.isNotEmpty) {
+                  await model.searchFriend();
+                }
+              },
               decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: 'メールアドレスで検索',
+                // suffix: IconButton(
+                //   icon: Icon(
+                //     Icons.clear,
+                //     color: Colors.black54,
+                //   ),
+                //   onPressed: () {
+                //     controller.clear();
+                //     model.clearEmail();
+                //   },
+                // ),
               ),
-              controller: controller,
+              controller: emailController,
               onChanged: (text) {
                 model.email = text;
                 model.checkClearBtn();
@@ -155,7 +178,7 @@ class SearchFriendPage extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     onPressed: () {
-                      controller.clear();
+                      emailController.clear();
                       model.clearEmail();
                     },
                   )
@@ -176,7 +199,7 @@ class SearchFriendPage extends StatelessWidget {
                     }
                   : null,
             ),
-          )
+          ),
         ],
       ),
     );

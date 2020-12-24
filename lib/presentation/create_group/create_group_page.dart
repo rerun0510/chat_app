@@ -3,76 +3,83 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class CreateGroupPage extends StatelessWidget {
-  CreateGroupPage(this.selectedMyFriends);
+  CreateGroupPage(this.selectedMyFriends, this.groupNameController);
   final List<Map> selectedMyFriends;
-  final textEditingController = TextEditingController();
+  final TextEditingController groupNameController;
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<CreateGroupModel>(
       create: (_) => CreateGroupModel(this.selectedMyFriends),
       child: Consumer<CreateGroupModel>(builder: (context, model, child) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: () => Navigator.of(context).pop(),
-              icon: Icon(Icons.arrow_back_ios),
-            ),
-            title: Text('プロフィールを設定'),
-            actions: [
-              FlatButton(
-                onPressed: model.groupName.length == 0
-                    ? null
-                    : () async {
-                        await model.createGroup();
-                        // user_page遷移用にMyGroupsを返却
-                        Navigator.of(context, rootNavigator: true)
-                            .pop(model.myGroups);
-                      },
-                child: Text(
-                  '作成',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
-                    color: model.groupName.length == 0
-                        ? Colors.grey
-                        : Colors.white,
-                  ),
-                ),
-              )
-            ],
-          ),
-          body: model.isLoading
-              ? Container(
-                  color: Colors.grey.withOpacity(0.8),
-                  child: Center(
-                    child: CircularProgressIndicator(),
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: () {
+                  groupNameController.clear();
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.arrow_back_ios),
+              ),
+              title: Text('プロフィールを設定'),
+              actions: [
+                FlatButton(
+                  onPressed: model.groupName.length == 0
+                      ? null
+                      : () async {
+                          await model.createGroup();
+                          // user_page遷移用にMyGroupsを返却
+                          Navigator.of(context, rootNavigator: true)
+                              .pop(model.myGroups);
+                        },
+                  child: Text(
+                    '作成',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: model.groupName.length == 0
+                          ? Colors.grey
+                          : Colors.white,
+                    ),
                   ),
                 )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // グループ情報入力フォーム
-                    _inputForm(model),
-                    // ヘッダー
-                    Container(
-                      width: MediaQuery.of(context).size.width,
-                      padding: EdgeInsets.fromLTRB(20, 2, 0, 2),
-                      margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            width: 1,
-                            color: Colors.grey.withOpacity(0.5),
+              ],
+            ),
+            body: model.isLoading
+                ? Container(
+                    color: Colors.grey.withOpacity(0.8),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // グループ情報入力フォーム
+                      _inputForm(model),
+                      // ヘッダー
+                      Container(
+                        width: MediaQuery.of(context).size.width,
+                        padding: EdgeInsets.fromLTRB(20, 2, 0, 2),
+                        margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              width: 1,
+                              color: Colors.grey.withOpacity(0.5),
+                            ),
                           ),
                         ),
+                        child: Text('メンバー'),
                       ),
-                      child: Text('メンバー'),
-                    ),
-                    // メンバーリスト
-                    _memberList(context, model),
-                  ],
-                ),
+                      // メンバーリスト
+
+                      _memberList(context, model),
+                    ],
+                  ),
+          ),
         );
       }),
     );
@@ -93,6 +100,7 @@ class CreateGroupPage extends StatelessWidget {
       child: Row(
         children: [
           GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () async {
               // todo 写真登録
               await model.showImagePicker();
@@ -100,12 +108,31 @@ class CreateGroupPage extends StatelessWidget {
             child: Stack(
               children: [
                 Container(
-                  child: CircleAvatar(
-                    radius: 50,
-                    backgroundImage: model.imageFile != null
-                        ? FileImage(model.imageFile)
-                        : NetworkImage(
-                            'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
+                  // child: CircleAvatar(
+                  //   radius: 50,
+                  //   backgroundImage: model.imageFile != null
+                  //       ? FileImage(model.imageFile)
+                  //       : NetworkImage(
+                  //           'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
+                  //         ),
+                  // ),
+                  child: ClipOval(
+                    // child: Container(
+                    //   color: Colors.red,
+                    //   height: 100,
+                    //   width: 100,
+                    // ),
+
+                    child: model.imageFile != null
+                        ? Image.file(
+                            model.imageFile,
+                            fit: BoxFit.cover,
+                            height: 100,
+                            width: 100,
+                          )
+                        : Icon(
+                            Icons.group,
+                            size: 80,
                           ),
                   ),
                 ),
@@ -144,7 +171,7 @@ class CreateGroupPage extends StatelessWidget {
                   border: InputBorder.none,
                   hintText: 'グループ名',
                 ),
-                controller: textEditingController,
+                controller: groupNameController,
                 onChanged: (text) {
                   model.groupName = text;
                   model.checkClearBtn();
@@ -160,7 +187,7 @@ class CreateGroupPage extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     onPressed: () {
-                      textEditingController.clear();
+                      groupNameController.clear();
                       model.clearGroupName();
                     },
                   )

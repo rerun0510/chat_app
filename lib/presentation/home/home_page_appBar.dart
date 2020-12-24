@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 
 class HomePageAppBar {
   Widget getAppBar(BuildContext context) {
+    final emailController = TextEditingController();
+    final groupNameController = TextEditingController();
     return AppBar(
       title: Text('ホーム'),
       actions: [
@@ -19,7 +21,8 @@ class HomePageAppBar {
                 height: MediaQuery.of(context).size.height * 0.9,
                 child: Navigator(
                   onGenerateRoute: (context) => MaterialPageRoute(
-                    builder: (context) => AddFriendPage(),
+                    builder: (context) =>
+                        AddFriendPage(emailController, groupNameController),
                   ),
                 ),
               ),

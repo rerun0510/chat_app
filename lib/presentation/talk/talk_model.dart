@@ -50,7 +50,7 @@ class TalkModel extends ChangeNotifier {
   }
 
   void setMessage(String text) {
-    message = text;
+    this.message = text;
     notifyListeners();
   }
 
@@ -60,11 +60,14 @@ class TalkModel extends ChangeNotifier {
   }
 
   Future sendMessage(String roomId, String userId) async {
-    if (message.isEmpty) {
+    if (this.message.isEmpty) {
       throw ('メッセージを入力してください。');
     }
 
-    Timestamp createdAt = Timestamp.now();
+    // 先にメッセージボックスの初期化を反映
+    notifyListeners();
+
+    final createdAt = Timestamp.now();
 
     await FirebaseFirestore.instance
         .collection('chatRoom')

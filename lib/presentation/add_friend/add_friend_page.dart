@@ -1,12 +1,15 @@
 import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/presentation/add_friend/add_friend_model.dart';
 import 'package:chat_app/presentation/search_friend/search_friend_page.dart';
-import 'package:chat_app/presentation/selectFriends/select_friends_page.dart';
+import 'package:chat_app/presentation/select_friend/select_friends_page.dart';
 import 'package:chat_app/presentation/user/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class AddFriendPage extends StatelessWidget {
+  AddFriendPage(this.emailController, this.groupNameController);
+  final TextEditingController emailController;
+  final TextEditingController groupNameController;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<AddFriendModel>(
@@ -46,7 +49,7 @@ class AddFriendPage extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            SearchFriendPage(),
+                                            SearchFriendPage(emailController),
                                       ),
                                     );
                                   },
@@ -67,8 +70,8 @@ class AddFriendPage extends StatelessWidget {
                                     await Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            SelectFriendsPage(),
+                                        builder: (context) => SelectFriendPage(
+                                            groupNameController),
                                       ),
                                     );
                                   },

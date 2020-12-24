@@ -20,13 +20,10 @@ class HomeModel extends ChangeNotifier {
     try {
       // currentUser取得
       this.currentUser = await fetchCurrentUser();
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(this.currentUser.userId)
-          .get();
-      this.currentUser = Users(doc);
-
-      await fetchHomeInfo();
+      // グループリスト取得
+      fetchGroups();
+      // 友達リスト取得
+      fetchFriends();
     } catch (e) {
       print(e);
       throw ('エラーが発生しました');
@@ -44,13 +41,6 @@ class HomeModel extends ChangeNotifier {
   endLoading() {
     isLoading = false;
     notifyListeners();
-  }
-
-  Future fetchHomeInfo() async {
-    // グループリスト取得
-    fetchGroups();
-    // 友達リスト取得
-    fetchFriends();
   }
 
   /// グループリスト取得

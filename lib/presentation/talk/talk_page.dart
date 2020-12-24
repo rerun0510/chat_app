@@ -10,7 +10,7 @@ class TalkPage extends StatelessWidget {
   TalkPage(this.chatRoomInfo);
   final ChatRoomInfo chatRoomInfo;
   final messageAreaController = TextEditingController();
-  GlobalKey globalKey = GlobalKey();
+  final GlobalKey globalKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -18,58 +18,61 @@ class TalkPage extends StatelessWidget {
     bool isAnotherDay;
     return ChangeNotifierProvider<TalkModel>(
       create: (_) => TalkModel(chatRoomInfo),
-      child: Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.of(context).pop();
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            title: Text(chatRoomInfo.roomName),
+          ),
+          body: Consumer<TalkModel>(
+            builder: (context, model, child) {
+              return Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.all(20),
+                      itemCount: model.messages.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final Messages messages = model.messages[index];
+
+                        final bool isMe = model.messages[index].userId ==
+                            model.currentUser.userId;
+
+                        if (index < model.messages.length - 1) {
+                          // 次のデータと比較する
+                          isSameUser = messages.userId ==
+                              model.messages[index + 1].userId;
+                          isAnotherDay = DateFormat('yyyy/MM/dd')
+                                  .format(messages.createdAt) !=
+                              DateFormat('yyyy/MM/dd')
+                                  .format(model.messages[index + 1].createdAt);
+                          if (isAnotherDay) {
+                            // 日付を跨いで連投した場合はアイコンを再表示
+                            isSameUser = false;
+                          }
+                        } else {
+                          // 次のデータが存在しない場合
+                          isSameUser = false;
+                          isAnotherDay = true;
+                        }
+
+                        return _chatBubble(model, messages, context, isMe,
+                            isSameUser, isAnotherDay, index);
+                      },
+                    ),
+                  ),
+                  _sendMessageArea(model, context),
+                ],
+              );
             },
           ),
-          title: Text(chatRoomInfo.roomName),
-        ),
-        body: Consumer<TalkModel>(
-          builder: (context, model, child) {
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    reverse: true,
-                    padding: EdgeInsets.all(20),
-                    itemCount: model.messages.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Messages messages = model.messages[index];
-
-                      final bool isMe = model.messages[index].userId ==
-                          model.currentUser.userId;
-
-                      if (index < model.messages.length - 1) {
-                        // 次のデータと比較する
-                        isSameUser =
-                            messages.userId == model.messages[index + 1].userId;
-                        isAnotherDay = DateFormat('yyyy/MM/dd')
-                                .format(messages.createdAt) !=
-                            DateFormat('yyyy/MM/dd')
-                                .format(model.messages[index + 1].createdAt);
-                        if (isAnotherDay) {
-                          // 日付を跨いで連投した場合はアイコンを再表示
-                          isSameUser = false;
-                        }
-                      } else {
-                        // 次のデータが存在しない場合
-                        isSameUser = false;
-                        isAnotherDay = true;
-                      }
-
-                      return _chatBubble(model, messages, context, isMe,
-                          isSameUser, isAnotherDay, index);
-                    },
-                  ),
-                ),
-                _sendMessageArea(model, context),
-              ],
-            );
-          },
         ),
       ),
     );
@@ -90,15 +93,16 @@ class TalkPage extends StatelessWidget {
                           padding: EdgeInsets.fromLTRB(10, 3, 10, 3),
                           margin: EdgeInsets.symmetric(vertical: 10),
                           decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 2,
-                                )
-                              ]),
+                            color: Colors.grey.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(15),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                              )
+                            ],
+                          ),
                           child: Text(
                             _fromAtNow(messages.createdAt),
                             style: TextStyle(
@@ -124,6 +128,7 @@ class TalkPage extends StatelessWidget {
                     ),
                   ),
                   // GestureDetector(
+                  // behavior: HitTestBehavior.opaque,
                   //   onLongPress: () async {
                   //     // RenderBox box =
                   //     //     globalKey.currentContext.findRenderObject();
@@ -195,6 +200,7 @@ class TalkPage extends StatelessWidget {
         ],
       );
     } else {
+      final imageURL = _getUserImage(model.usersList, messages.userId);
       return Column(
         children: [
           Column(
@@ -233,18 +239,33 @@ class TalkPage extends StatelessWidget {
                         Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                blurRadius: 5,
-                              )
-                            ],
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: Colors.grey.withOpacity(0.5),
+                            //     blurRadius: 5,
+                            //   )
+                            // ],
                           ),
-                          child: CircleAvatar(
-                            radius: 15,
-                            backgroundImage: NetworkImage(
-                              _getUserImage(model.usersList, messages.userId),
-                            ),
+                          // child: CircleAvatar(
+                          //   radius: 15,
+                          //   backgroundImage: NetworkImage(
+                          //     _getUserImage(model.usersList, messages.userId),
+                          //   ),
+                          // ),
+                          child: ClipOval(
+                            child: imageURL != null
+                                ? Image.network(
+                                    imageURL,
+                                    width: 35,
+                                    height: 35,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, object, stackTrace) {
+                                      return Icon(Icons.account_circle,
+                                          size: 50);
+                                    },
+                                  )
+                                : Icon(Icons.account_circle, size: 50),
                           ),
                         ),
                         SizedBox(
@@ -331,6 +352,9 @@ class TalkPage extends StatelessWidget {
           ),
           Expanded(
             child: TextField(
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              textInputAction: TextInputAction.newline,
               controller: messageAreaController,
               decoration: InputDecoration.collapsed(
                 hintText: 'Send a message..',
@@ -349,8 +373,8 @@ class TalkPage extends StatelessWidget {
                 : Colors.grey,
             onPressed: () async {
               if (model.message.isNotEmpty) {
-                await _sendMessage(model, context);
                 messageAreaController.clear();
+                await _sendMessage(model, context);
                 model.setMessage('');
               }
             },

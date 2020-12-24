@@ -1,14 +1,16 @@
 import 'package:chat_app/presentation/create_group/create_group_page.dart';
-import 'package:chat_app/presentation/selectFriends/select_friends_model.dart';
+import 'package:chat_app/presentation/select_friend/select_friend_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SelectFriendsPage extends StatelessWidget {
+class SelectFriendPage extends StatelessWidget {
+  SelectFriendPage(this.groupNameController);
+  final TextEditingController groupNameController;
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SelectFriendsModel>(
-      create: (_) => SelectFriendsModel(),
-      child: Consumer<SelectFriendsModel>(builder: (context, model, child) {
+    return ChangeNotifierProvider<SelectFriendModel>(
+      create: (_) => SelectFriendModel(),
+      child: Consumer<SelectFriendModel>(builder: (context, model, child) {
         final int friendsCnt = model.myFriends.length;
         final int selectCnt = model.selectedMyFriends.length;
         return Scaffold(
@@ -24,8 +26,8 @@ class SelectFriendsPage extends StatelessWidget {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          CreateGroupPage(model.selectedMyFriends),
+                      builder: (context) => CreateGroupPage(
+                          model.selectedMyFriends, groupNameController),
                     ),
                   );
                 },

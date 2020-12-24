@@ -3,8 +3,8 @@ import 'package:chat_app/repository/current_user_repository.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class SelectFriendsModel extends ChangeNotifier {
-  SelectFriendsModel() {
+class SelectFriendModel extends ChangeNotifier {
+  SelectFriendModel() {
     _init();
   }
 

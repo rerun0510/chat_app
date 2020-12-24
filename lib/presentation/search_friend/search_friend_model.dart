@@ -23,11 +23,6 @@ class SearchFriendModel extends ChangeNotifier {
   Future _init() async {
     // currentUser取得
     this.currentUser = await fetchCurrentUser();
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(this.currentUser.userId)
-        .get();
-    this.currentUser = Users(doc);
   }
 
   void startSearchLoading() {
@@ -52,7 +47,7 @@ class SearchFriendModel extends ChangeNotifier {
 
   void clearEmail() {
     this.email = '';
-    clearBtnFlg = false;
+    this.clearBtnFlg = false;
     notifyListeners();
   }
 

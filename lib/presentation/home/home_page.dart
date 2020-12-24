@@ -16,6 +16,7 @@ class HomePage extends StatelessWidget {
             final int friendsCnt = model.myFriendsList.length;
             return model.isLoading
                 ? Container(
+                    color: Colors.grey.withOpacity(0.8),
                     child: Center(
                       child: CircularProgressIndicator(),
                     ),
@@ -57,6 +58,7 @@ class HomePage extends StatelessWidget {
 
   _myAccount(Users users, BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () async {
         // ユーザー画面に遷移
         await showModalBottomSheet(
@@ -75,23 +77,17 @@ class HomePage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(2),
               child: ClipOval(
-                child: users.imageURL != null
+                child: users.imageURL != ''
                     ? Image.network(
                         users.imageURL,
-                        // errorBuilder: (context, object, stackTrace) {
-                        //   return Icon(
-                        //     Icons.account_circle,
-                        //     size: 55,
-                        //   );
-                        // },
                         width: 55,
                         height: 55,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, object, stackTrace) {
+                          return Icon(Icons.account_circle, size: 55);
+                        },
                       )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 55,
-                      ),
+                    : Icon(Icons.account_circle, size: 55),
               ),
             ),
             Container(
@@ -100,7 +96,7 @@ class HomePage extends StatelessWidget {
                 left: 20,
               ),
               child: Text(
-                users.name != null ? users.name : '',
+                users.name != '' ? users.name : '',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
@@ -133,26 +129,20 @@ class HomePage extends StatelessWidget {
                 child: group.imageURL != null
                     ? Image.network(
                         group.imageURL,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 50,
-                          );
-                        },
                         width: 50,
                         height: 50,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, object, stackTrace) {
+                          return Icon(Icons.account_circle, size: 50);
+                        },
                       )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50,
-                      ),
+                    : Icon(Icons.account_circle, size: 50),
               ),
             ),
             title: Container(
               width: MediaQuery.of(context).size.width * 0.65,
               child: Text(
-                group.groupsName != null ? group.groupsName : '',
+                group.groupsName != '' ? group.groupsName : '',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -183,29 +173,23 @@ class HomePage extends StatelessWidget {
             leading: Container(
               padding: EdgeInsets.all(2),
               child: ClipOval(
-                child: friend.imageURL != null
+                child: friend.imageURL != ''
                     ? Image.network(
                         friend.imageURL,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 50,
-                          );
-                        },
                         width: 50,
                         height: 50,
                         fit: BoxFit.cover,
+                        errorBuilder: (context, object, stackTrace) {
+                          return Icon(Icons.account_circle, size: 50);
+                        },
                       )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50,
-                      ),
+                    : Icon(Icons.account_circle, size: 50),
               ),
             ),
             title: Container(
               width: MediaQuery.of(context).size.width * 0.65,
               child: Text(
-                friend.usersName != null ? friend.usersName : '',
+                friend.usersName != '' ? friend.usersName : '',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 class RootPage extends StatelessWidget {
-  bool debug = false;
+  final bool debug = false;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<RootModel>(
