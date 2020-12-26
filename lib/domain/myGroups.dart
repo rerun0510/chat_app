@@ -14,4 +14,5 @@ class MyGroups {
   bool memberFlg;
   String groupsName;
   String imageURL;
+  String backgroundImage;
 }

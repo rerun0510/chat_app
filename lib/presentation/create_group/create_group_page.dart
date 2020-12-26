@@ -108,21 +108,7 @@ class CreateGroupPage extends StatelessWidget {
             child: Stack(
               children: [
                 Container(
-                  // child: CircleAvatar(
-                  //   radius: 50,
-                  //   backgroundImage: model.imageFile != null
-                  //       ? FileImage(model.imageFile)
-                  //       : NetworkImage(
-                  //           'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
-                  //         ),
-                  // ),
                   child: ClipOval(
-                    // child: Container(
-                    //   color: Colors.red,
-                    //   height: 100,
-                    //   width: 100,
-                    // ),
-
                     child: model.imageFile != null
                         ? Image.file(
                             model.imageFile,
@@ -202,7 +188,7 @@ class CreateGroupPage extends StatelessWidget {
   Widget _memberList(BuildContext context, CreateGroupModel model) {
     return Expanded(
       child: GridView.count(
-        crossAxisCount: 4,
+        crossAxisCount: 3,
         scrollDirection: Axis.vertical,
         children: List.generate(
           model.selectedMyFriends.length,
@@ -220,7 +206,7 @@ class CreateGroupPage extends StatelessWidget {
                               errorBuilder: (context, object, stackTrace) {
                                 return Icon(
                                   Icons.account_circle,
-                                  size: 70,
+                                  size: 60,
                                 );
                               },
                               width: 70,
@@ -229,7 +215,7 @@ class CreateGroupPage extends StatelessWidget {
                             )
                           : Icon(
                               Icons.account_circle,
-                              size: 70,
+                              size: 60,
                             ),
                     ),
                   ),

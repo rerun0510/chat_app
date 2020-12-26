@@ -5,9 +5,11 @@ class Groups {
     groupsId = doc.id;
     groupName = doc['groupName'];
     imageURL = doc['imageURL'];
+    backgroundImage = doc['backgroundImage'];
   }
 
   String groupsId;
   String groupName;
   String imageURL;
+  String backgroundImage;
 }

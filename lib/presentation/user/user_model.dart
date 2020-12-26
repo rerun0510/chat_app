@@ -16,6 +16,7 @@ class UserModel extends ChangeNotifier {
   bool isLoading = false;
   String name = '';
   String imageURL = '';
+  String backgroundImage = '';
   bool isMe = false;
 
   ChatRoomInfo chatRoomInfo;
@@ -29,14 +30,17 @@ class UserModel extends ChangeNotifier {
       if (myGroups != null) {
         this.name = myGroups.groupsName;
         this.imageURL = myGroups.imageURL;
+        this.backgroundImage = myGroups.backgroundImage;
         fetchChatRoomInfo(myGroups.chatRoomInfoRef, this.currentUser);
       } else if (myFriends != null) {
         this.name = myFriends.usersName;
         this.imageURL = myFriends.imageURL;
+        this.backgroundImage = myFriends.backgroundImage;
         fetchChatRoomInfo(myFriends.chatRoomInfoRef, this.currentUser);
       } else {
         this.name = this.currentUser.name;
         this.imageURL = this.currentUser.imageURL;
+        this.backgroundImage = this.currentUser.backgroundImage;
         this.isMe = true;
       }
     } catch (e) {

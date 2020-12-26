@@ -14,4 +14,5 @@ class MyFriends {
   bool friendFlg;
   String usersName;
   String imageURL;
+  String backgroundImage;
 }

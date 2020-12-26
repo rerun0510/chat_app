@@ -61,6 +61,7 @@ class HomeModel extends ChangeNotifier {
           final doc = snapshot.data();
           this.myGroupsList[i].groupsName = doc['groupName'];
           this.myGroupsList[i].imageURL = doc['imageURL'];
+          this.myGroupsList[i].backgroundImage = doc['backgroundImage'];
           notifyListeners();
         });
       }
@@ -87,6 +88,7 @@ class HomeModel extends ChangeNotifier {
           final doc = snapshot.data();
           this.myFriendsList[i].usersName = doc['name'];
           this.myFriendsList[i].imageURL = doc['imageURL'];
+          this.myFriendsList[i].backgroundImage = doc['backgroundImage'];
           notifyListeners();
         });
       }
