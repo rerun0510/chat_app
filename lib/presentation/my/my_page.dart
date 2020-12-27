@@ -45,45 +45,64 @@ class MyPage extends StatelessWidget {
                             // 背景設定
                             await model.showImagePickerBackground();
                           },
-                          child: Container(
-                            height: 230,
-                            decoration: BoxDecoration(
-                              image: DecorationImage(
-                                  image: NetworkImage(
-                                      model.currentUser.backgroundImage),
-                                  fit: BoxFit.cover),
-                            ),
-                            child: Center(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  // アイコン設定
-                                  await model.showImagePickerIcon();
-                                },
-                                child: ClipOval(
-                                  child: Container(
-                                    color: Colors.white,
-                                    child: model.currentUser.imageURL != null
-                                        ? Image.network(
-                                            model.currentUser.imageURL,
-                                            errorBuilder:
-                                                (context, object, stackTrace) {
-                                              return Icon(
-                                                Icons.account_circle,
-                                                size: 50,
-                                              );
-                                            },
-                                            width: 120,
-                                            height: 120,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : Icon(
-                                            Icons.account_circle,
-                                            size: 50,
+                          child: Stack(
+                            children: [
+                              Container(
+                                height: 230,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                      image: NetworkImage(
+                                          model.currentUser.backgroundImage),
+                                      fit: BoxFit.cover),
+                                ),
+                                child: Center(
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      // アイコン設定
+                                      await model.showImagePickerIcon();
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        ClipOval(
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: model.currentUser.imageURL !=
+                                                    null
+                                                ? Image.network(
+                                                    model.currentUser.imageURL,
+                                                    errorBuilder: (context,
+                                                        object, stackTrace) {
+                                                      return Icon(
+                                                        Icons.account_circle,
+                                                        size: 50,
+                                                      );
+                                                    },
+                                                    width: 120,
+                                                    height: 120,
+                                                    fit: BoxFit.cover,
+                                                  )
+                                                : Icon(
+                                                    Icons.account_circle,
+                                                    size: 50,
+                                                  ),
                                           ),
+                                        ),
+                                        Positioned(
+                                          right: 0,
+                                          bottom: 0,
+                                          child: cameraIcon(),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                              Positioned(
+                                right: 15,
+                                bottom: 20,
+                                child: cameraIcon(),
+                              )
+                            ],
                           ),
                         ),
                         Container(
@@ -177,28 +196,25 @@ class MyPage extends StatelessWidget {
     );
   }
 
-  /// ユーザーのアイコン
-  Widget _userImage(UserModel model) {
-    return ClipOval(
-      child: Container(
-        color: Colors.white,
-        child: model.imageURL != ''
-            ? Image.network(
-                model.imageURL,
-                errorBuilder: (context, object, stackTrace) {
-                  return Icon(
-                    Icons.account_circle,
-                    size: 125,
-                  );
-                },
-                width: 125,
-                height: 125,
-                fit: BoxFit.cover,
-              )
-            : Icon(
-                Icons.account_circle,
-                size: 125,
-              ),
+  Widget cameraIcon() {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(
+          width: 1,
+          color: Colors.grey,
+        ),
+        shape: BoxShape.circle,
+      ),
+      child: SizedBox(
+        height: 30,
+        child: CircleAvatar(
+          backgroundColor: Colors.white,
+          child: Icon(
+            Icons.photo_camera_outlined,
+            size: 16,
+            color: Colors.grey,
+          ),
+        ),
       ),
     );
   }
