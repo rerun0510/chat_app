@@ -95,4 +95,18 @@ class HomeModel extends ChangeNotifier {
       notifyListeners();
     });
   }
+
+  /// プロフィール再表示
+  Future reload() async {
+    try {
+      // currentUser取得
+      this.currentUser = await fetchCurrentUser();
+    } catch (e) {
+      print(e);
+      throw ('エラーが発生しました');
+    } finally {
+      endLoading();
+      notifyListeners();
+    }
+  }
 }

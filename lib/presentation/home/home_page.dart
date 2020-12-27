@@ -25,7 +25,7 @@ class HomePage extends StatelessWidget {
                     child: ListView(
                       children: [
                         Container(
-                          child: _myAccount(model.currentUser, context),
+                          child: _myAccount(model, context),
                         ),
                         ExpansionTile(
                           initiallyExpanded: false,
@@ -56,7 +56,8 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  _myAccount(Users users, BuildContext context) {
+  _myAccount(HomeModel model, BuildContext context) {
+    Users users = model.currentUser;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
@@ -66,6 +67,7 @@ class HomePage extends StatelessWidget {
           isScrollControlled: true,
           builder: (context) => UserPage(null, null),
         );
+        await model.reload();
       },
       child: Container(
         padding: EdgeInsets.symmetric(
