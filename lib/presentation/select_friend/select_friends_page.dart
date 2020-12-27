@@ -27,7 +27,9 @@ class SelectFriendPage extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => CreateGroupPage(
-                          model.selectedMyFriends, groupNameController),
+                        model.selectedMyFriends,
+                        groupNameController,
+                      ),
                     ),
                   );
                 },

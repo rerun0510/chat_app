@@ -143,23 +143,26 @@ class AddFriendPage extends StatelessWidget {
             leading: Container(
               padding: EdgeInsets.all(2),
               child: ClipOval(
-                child: myFriend.imageURL != null
-                    ? Image.network(
-                        myFriend.imageURL,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(
-                            Icons.account_circle,
-                            size: 50,
-                          );
-                        },
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                      )
-                    : Icon(
-                        Icons.account_circle,
-                        size: 50,
-                      ),
+                child: Container(
+                  color: Colors.white,
+                  child: myFriend.imageURL != null
+                      ? Image.network(
+                          myFriend.imageURL,
+                          errorBuilder: (context, object, stackTrace) {
+                            return Icon(
+                              Icons.account_circle,
+                              size: 50,
+                            );
+                          },
+                          width: 50,
+                          height: 50,
+                          fit: BoxFit.cover,
+                        )
+                      : Icon(
+                          Icons.account_circle,
+                          size: 50,
+                        ),
+                ),
               ),
             ),
             title: Container(

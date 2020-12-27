@@ -104,4 +104,14 @@ class UserModel extends ChangeNotifier {
       }
     });
   }
+
+  /// プロフィール再表示
+  Future reload() async {
+    // currentUser取得
+    this.currentUser = await fetchCurrentUser();
+    this.name = this.currentUser.name;
+    this.imageURL = this.currentUser.imageURL;
+    this.backgroundImage = this.currentUser.backgroundImage;
+    notifyListeners();
+  }
 }
