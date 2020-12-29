@@ -193,47 +193,44 @@ class CreateGroupPage extends StatelessWidget {
         children: List.generate(
           model.selectedMyFriends.length,
           (index) {
-            return Expanded(
-              flex: 2,
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(2),
-                    child: ClipOval(
-                      child: model.selectedMyFriends[index]['imageURL'] != null
-                          ? Image.network(
-                              model.selectedMyFriends[index]['imageURL'],
-                              errorBuilder: (context, object, stackTrace) {
-                                return Icon(
-                                  Icons.account_circle,
-                                  size: 60,
-                                );
-                              },
-                              width: 70,
-                              height: 70,
-                              fit: BoxFit.cover,
-                            )
-                          : Icon(
-                              Icons.account_circle,
-                              size: 60,
-                            ),
-                    ),
+            return Column(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(2),
+                  child: ClipOval(
+                    child: model.selectedMyFriends[index]['imageURL'] != null
+                        ? Image.network(
+                            model.selectedMyFriends[index]['imageURL'],
+                            errorBuilder: (context, object, stackTrace) {
+                              return Icon(
+                                Icons.account_circle,
+                                size: 60,
+                              );
+                            },
+                            width: 70,
+                            height: 70,
+                            fit: BoxFit.cover,
+                          )
+                        : Icon(
+                            Icons.account_circle,
+                            size: 60,
+                          ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(2),
-                    child: Text(
-                      model.selectedMyFriends[index]['usersName'] != null
-                          ? model.selectedMyFriends[index]['usersName']
-                          : '',
-                      style: TextStyle(
-                        fontSize: 12,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                ),
+                Container(
+                  padding: EdgeInsets.all(2),
+                  child: Text(
+                    model.selectedMyFriends[index]['usersName'] != null
+                        ? model.selectedMyFriends[index]['usersName']
+                        : '',
+                    style: TextStyle(
+                      fontSize: 12,
                     ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
