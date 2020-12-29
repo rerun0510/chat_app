@@ -14,7 +14,7 @@ class UserPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController textEditingController = TextEditingController();
+    final TextEditingController controller = TextEditingController();
 
     return ChangeNotifierProvider<UserModel>(
       create: (_) => UserModel(myGroups, myFriends),
@@ -37,57 +37,12 @@ class UserPage extends StatelessWidget {
                     ),
                     child: SafeArea(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(2, 30, 2, 0),
+                        padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
                         child: Center(
                           child: Column(
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(
-                                    onPressed: () => Navigator.of(context,
-                                            rootNavigator: true)
-                                        .pop(),
-                                    icon: Icon(
-                                      Icons.clear,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Container(
-                                    child: model.isMe
-                                        ? IconButton(
-                                            onPressed: () async {
-                                              await showModalBottomSheet(
-                                                context: context,
-                                                isScrollControlled: true,
-                                                builder: (context) => Container(
-                                                  height: MediaQuery.of(context)
-                                                          .size
-                                                          .height *
-                                                      0.9,
-                                                  child: Navigator(
-                                                    onGenerateRoute:
-                                                        (context) =>
-                                                            MaterialPageRoute(
-                                                      builder: (context) => MyPage(
-                                                          textEditingController),
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                              // プロフィール再表示
-                                              await model.reload();
-                                            },
-                                            icon: Icon(
-                                              Icons.edit,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        : null,
-                                  ),
-                                ],
-                              ),
+                              // AppBar
+                              _appBar(model, controller, context),
                               SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.25,
@@ -108,8 +63,8 @@ class UserPage extends StatelessWidget {
                                       child: Text(
                                         model.name != null ? model.name : '',
                                         style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w900,
                                           color: Colors.white,
                                         ),
                                         textAlign: TextAlign.center,
@@ -123,45 +78,7 @@ class UserPage extends StatelessWidget {
                               SizedBox(
                                 height:
                                     MediaQuery.of(context).size.height * 0.15,
-                                child: model.isMe
-                                    ? Container()
-                                    : Row(
-                                        children: [
-                                          Expanded(
-                                            child: Column(
-                                              children: [
-                                                IconButton(
-                                                  icon: Icon(
-                                                    Icons.textsms_outlined,
-                                                    color: Colors.white,
-                                                  ),
-                                                  onPressed: () async {
-                                                    // トーク画面に遷移
-                                                    Navigator.of(context,
-                                                            rootNavigator:
-                                                                false)
-                                                        .pop();
-                                                    await Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            TalkPage(model
-                                                                .chatRoomInfo),
-                                                      ),
-                                                    );
-                                                  },
-                                                ),
-                                                Text(
-                                                  'TALK',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      ),
+                                child: _btn(model, context),
                               ),
                             ],
                           ),
@@ -172,6 +89,50 @@ class UserPage extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  /// AppBar
+  Widget _appBar(
+      UserModel model, TextEditingController controller, BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        IconButton(
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          icon: Icon(
+            Icons.clear,
+            color: Colors.white,
+          ),
+        ),
+        Container(
+          // 自分のプロフィールの場合は編集ボタンを設置
+          child: model.isMe
+              ? IconButton(
+                  onPressed: () async {
+                    await showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (context) => Container(
+                        height: MediaQuery.of(context).size.height * 0.9,
+                        child: Navigator(
+                          onGenerateRoute: (context) => MaterialPageRoute(
+                            builder: (context) => MyPage(controller),
+                          ),
+                        ),
+                      ),
+                    );
+                    // プロフィール再表示
+                    await model.reload();
+                  },
+                  icon: Icon(
+                    Icons.edit,
+                    color: Colors.white,
+                  ),
+                )
+              : null,
+        ),
+      ],
     );
   }
 
@@ -197,6 +158,81 @@ class UserPage extends StatelessWidget {
                 Icons.account_circle,
                 size: 125,
               ),
+      ),
+    );
+  }
+
+  /// Btn
+  Widget _btn(UserModel model, BuildContext context) {
+    return model.isMe
+        ? Container()
+        : Row(
+            children: [
+              model.isFriend
+                  ? _talkBtn(model, context)
+                  : _addFriendBtn(model, context),
+            ],
+          );
+  }
+
+  /// TalkBtn
+  Widget _talkBtn(UserModel model, BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.textsms_outlined,
+              color: Colors.white,
+              size: 35,
+            ),
+            onPressed: () async {
+              // トーク画面に遷移
+              Navigator.of(context, rootNavigator: false).pop();
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TalkPage(model.chatRoomInfo),
+                ),
+              );
+            },
+          ),
+          Text(
+            'TALK',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// AddFriendBtn
+  Widget _addFriendBtn(UserModel model, BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.person_add,
+              color: Colors.white,
+              size: 35,
+            ),
+            onPressed: () async {
+              // トーク画面に遷移
+              model.addFriend(myFriends);
+            },
+          ),
+          Text(
+            'ADD',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }

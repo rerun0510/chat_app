@@ -18,6 +18,7 @@ class UserModel extends ChangeNotifier {
   String imageURL = '';
   String backgroundImage = '';
   bool isMe = false;
+  bool isFriend = true;
 
   ChatRoomInfo chatRoomInfo;
 
@@ -37,6 +38,7 @@ class UserModel extends ChangeNotifier {
         this.imageURL = myFriends.imageURL;
         this.backgroundImage = myFriends.backgroundImage;
         fetchChatRoomInfo(myFriends.chatRoomInfoRef, this.currentUser);
+        this.isFriend = myFriends.friendFlg;
       } else {
         this.name = this.currentUser.name;
         this.imageURL = this.currentUser.imageURL;
@@ -112,6 +114,31 @@ class UserModel extends ChangeNotifier {
     this.name = this.currentUser.name;
     this.imageURL = this.currentUser.imageURL;
     this.backgroundImage = this.currentUser.backgroundImage;
+    notifyListeners();
+  }
+
+  /// 友達追加
+  Future addFriend(MyFriends myFriend) async {
+    // フレンドフラグの更新
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.userId)
+        .collection('friends')
+        .doc(myFriend.usersId)
+        .update(
+      {
+        'friendFlg': true,
+      },
+    );
+
+    // トーク一覧に表示
+    await myFriend.chatRoomInfoRef.update(
+      {
+        'visible': true,
+      },
+    );
+
+    this.isFriend = true;
     notifyListeners();
   }
 }

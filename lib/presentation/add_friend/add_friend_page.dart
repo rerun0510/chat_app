@@ -52,6 +52,8 @@ class AddFriendPage extends StatelessWidget {
                                             SearchFriendPage(emailController),
                                       ),
                                     );
+                                    // データ再読み込み
+                                    await model.fetchMayBeFriend();
                                   },
                                   child: Column(
                                     children: [
@@ -101,21 +103,22 @@ class AddFriendPage extends StatelessWidget {
                           ),
                         ),
                         Expanded(
-                          child: _mayByFriendList(model.myFriends),
+                          child: _mayByFriendList(model),
                         ),
                       ],
                     ),
                   ),
                 ),
                 Container(
-                    child: model.isLoading
-                        ? Container(
-                            color: Colors.grey.withOpacity(0.8),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        : null),
+                  child: model.isLoading
+                      ? Container(
+                          color: Colors.grey.withOpacity(0.8),
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : null,
+                ),
               ],
             ),
           );
@@ -124,7 +127,8 @@ class AddFriendPage extends StatelessWidget {
     );
   }
 
-  Widget _mayByFriendList(List<MyFriends> myFriends) {
+  Widget _mayByFriendList(AddFriendModel model) {
+    final List<MyFriends> myFriends = model.myFriends;
     return ListView.builder(
       itemCount: myFriends.length,
       itemBuilder: (context, index) {
@@ -136,8 +140,11 @@ class AddFriendPage extends StatelessWidget {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
+                useRootNavigator: true,
                 builder: (context) => UserPage(null, myFriend),
               );
+              // データ再読み込み
+              await model.fetchMayBeFriend();
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
             leading: Container(
@@ -178,7 +185,10 @@ class AddFriendPage extends StatelessWidget {
               ),
             ),
             trailing: IconButton(
-              onPressed: () async {},
+              onPressed: () async {
+                // 友達追加
+                await model.addFriend(myFriend);
+              },
               icon: Icon(
                 Icons.person_add,
                 color: Colors.grey,

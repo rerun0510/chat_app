@@ -177,7 +177,7 @@ class SearchFriendModel extends ChangeNotifier {
             .set({
           'usersRef': usersRef,
           'chatRoomInfoRef':
-              usersRef.collection('chatRoomInfo').doc(roomRef.id),
+              friendUsersRef.collection('chatRoomInfo').doc(roomRef.id),
           'friendFlg': false,
         });
 

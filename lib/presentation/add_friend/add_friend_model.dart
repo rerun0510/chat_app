@@ -37,6 +37,7 @@ class AddFriendModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // 知り合いかも一覧取得
   Future fetchMayBeFriend() async {
     final docs = await FirebaseFirestore.instance
         .collection('users')
@@ -50,10 +51,36 @@ class AddFriendModel extends ChangeNotifier {
       final doc = await myFriends[i].usersRef.get();
       myFriends[i].usersName = doc['name'];
       myFriends[i].imageURL = doc['imageURL'];
+      myFriends[i].backgroundImage = doc['backgroundImage'];
     }
 
     this.myFriends = myFriends;
 
     notifyListeners();
+  }
+
+  /// 友達追加
+  Future addFriend(MyFriends myFriend) async {
+    // フレンドフラグの更新
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.userId)
+        .collection('friends')
+        .doc(myFriend.usersId)
+        .update(
+      {
+        'friendFlg': true,
+      },
+    );
+
+    // トーク一覧に表示
+    await myFriend.chatRoomInfoRef.update(
+      {
+        'visible': true,
+      },
+    );
+
+    // 知り合いかも一覧再表示
+    await fetchMayBeFriend();
   }
 }
