@@ -30,48 +30,51 @@ class TalkPage extends StatelessWidget {
             ),
             title: Text(chatRoomInfo.roomName),
           ),
-          body: Consumer<TalkModel>(
-            builder: (context, model, child) {
-              return Column(
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      reverse: true,
-                      padding: EdgeInsets.all(20),
-                      itemCount: model.messages.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final Messages messages = model.messages[index];
+          body: Container(
+            color: Colors.white10,
+            child: Consumer<TalkModel>(
+              builder: (context, model, child) {
+                return Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        reverse: true,
+                        padding: EdgeInsets.all(20),
+                        itemCount: model.messages.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          final Messages messages = model.messages[index];
 
-                        final bool isMe = model.messages[index].userId ==
-                            model.currentUser.userId;
+                          final bool isMe = model.messages[index].userId ==
+                              model.currentUser.userId;
 
-                        if (index < model.messages.length - 1) {
-                          // 次のデータと比較する
-                          isSameUser = messages.userId ==
-                              model.messages[index + 1].userId;
-                          isAnotherDay = DateFormat('yyyy/MM/dd')
-                                  .format(messages.createdAt) !=
-                              DateFormat('yyyy/MM/dd')
-                                  .format(model.messages[index + 1].createdAt);
-                          if (isAnotherDay) {
-                            // 日付を跨いで連投した場合はアイコンを再表示
+                          if (index < model.messages.length - 1) {
+                            // 次のデータと比較する
+                            isSameUser = messages.userId ==
+                                model.messages[index + 1].userId;
+                            isAnotherDay = DateFormat('yyyy/MM/dd')
+                                    .format(messages.createdAt) !=
+                                DateFormat('yyyy/MM/dd').format(
+                                    model.messages[index + 1].createdAt);
+                            if (isAnotherDay) {
+                              // 日付を跨いで連投した場合はアイコンを再表示
+                              isSameUser = false;
+                            }
+                          } else {
+                            // 次のデータが存在しない場合
                             isSameUser = false;
+                            isAnotherDay = true;
                           }
-                        } else {
-                          // 次のデータが存在しない場合
-                          isSameUser = false;
-                          isAnotherDay = true;
-                        }
 
-                        return _chatBubble(model, messages, context, isMe,
-                            isSameUser, isAnotherDay, index);
-                      },
+                          return _chatBubble(model, messages, context, isMe,
+                              isSameUser, isAnotherDay, index);
+                        },
+                      ),
                     ),
-                  ),
-                  _sendMessageArea(model, context),
-                ],
-              );
-            },
+                    _sendMessageArea(model, context),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -253,19 +256,22 @@ class TalkPage extends StatelessWidget {
                           //   ),
                           // ),
                           child: ClipOval(
-                            child: imageURL != null
-                                ? Image.network(
-                                    imageURL,
-                                    width: 35,
-                                    height: 35,
-                                    fit: BoxFit.cover,
-                                    errorBuilder:
-                                        (context, object, stackTrace) {
-                                      return Icon(Icons.account_circle,
-                                          size: 50);
-                                    },
-                                  )
-                                : Icon(Icons.account_circle, size: 50),
+                            child: Container(
+                              color: Colors.white,
+                              child: imageURL != null
+                                  ? Image.network(
+                                      imageURL,
+                                      width: 35,
+                                      height: 35,
+                                      fit: BoxFit.cover,
+                                      errorBuilder:
+                                          (context, object, stackTrace) {
+                                        return Icon(Icons.account_circle,
+                                            size: 50);
+                                      },
+                                    )
+                                  : Icon(Icons.account_circle, size: 50),
+                            ),
                           ),
                         ),
                         SizedBox(
@@ -275,7 +281,7 @@ class TalkPage extends StatelessWidget {
                           _getUserName(model.usersList, messages.userId),
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.black45,
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -307,7 +313,7 @@ class TalkPage extends StatelessWidget {
                       child: Text(
                         messages.message,
                         style: TextStyle(
-                          color: Colors.black54,
+                          color: Colors.black,
                         ),
                       ),
                     ),

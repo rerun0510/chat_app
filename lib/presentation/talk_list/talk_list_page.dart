@@ -12,144 +12,152 @@ class TalkListPage extends StatelessWidget {
     return ChangeNotifierProvider<TalkListModel>(
       create: (_) => TalkListModel(),
       child: Scaffold(
-        body: Consumer<TalkListModel>(
-          builder: (context, model, child) {
-            return model.isLoading
-                ? Container(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: model.chatRoomInfoList.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final ChatRoomInfo chatRoomInfo =
-                          model.chatRoomInfoList[index];
-                      return GestureDetector(
-                        behavior: HitTestBehavior.opaque,
-                        onTap: () async {
-                          // トーク画面に遷移
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TalkPage(chatRoomInfo),
+        body: Container(
+          color: Colors.white10,
+          child: Consumer<TalkListModel>(
+            builder: (context, model, child) {
+              return model.isLoading
+                  ? Container(
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: model.chatRoomInfoList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final ChatRoomInfo chatRoomInfo =
+                            model.chatRoomInfoList[index];
+                        return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {
+                            // トーク画面に遷移
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TalkPage(chatRoomInfo),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 15,
                             ),
-                          );
-                        },
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 15,
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(2),
-                                // decoration: chatRoomInfo.unread
-                                //     ? BoxDecoration(
-                                //         borderRadius: BorderRadius.all(
-                                //           Radius.circular(40),
-                                //         ),
-                                //         border: Border.all(
-                                //           width: 2,
-                                //           color: Theme.of(context).primaryColor,
-                                //         ),
-                                //         boxShadow: [
-                                //           BoxShadow(
-                                //             color: Colors.grey.withOpacity(0.5),
-                                //             spreadRadius: 2,
-                                //             blurRadius: 5,
-                                //           ),
-                                //         ],
-                                //       )
-                                //     : BoxDecoration(
-                                //         shape: BoxShape.circle,
-                                //         boxShadow: [
-                                //           BoxShadow(
-                                //             color: Colors.grey.withOpacity(0.5),
-                                //             spreadRadius: 2,
-                                //             blurRadius: 5,
-                                //           ),
-                                //         ],
-                                //       ),
-                                // child: CircleAvatar(
-                                //     radius: 35,
-                                //     backgroundImage: NetworkImage(
-                                //       chatRoomInfo.imageURL != null
-                                //           ? chatRoomInfo.imageURL
-                                //           : 'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
-                                //     )),
-                                child: ClipOval(
-                                  child: chatRoomInfo.imageURL != null
-                                      ? Image.network(
-                                          chatRoomInfo.imageURL,
-                                          width: 75,
-                                          height: 75,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, object, stackTrace) {
-                                            return Icon(Icons.account_circle,
-                                                size: 75);
-                                          },
-                                        )
-                                      : Icon(Icons.account_circle, size: 75),
-                                ),
-                              ),
-                              Container(
-                                width: MediaQuery.of(context).size.width * 0.65,
-                                padding: EdgeInsets.only(
-                                  left: 20,
-                                ),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          chatRoomInfo.roomName != null
-                                              ? chatRoomInfo.roomName
-                                              : '',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        Text(
-                                          _fromAtNow(chatRoomInfo.updateAt),
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w300,
-                                            color: Colors.black54,
-                                          ),
-                                        ),
-                                      ],
+                            child: Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(2),
+                                  // decoration: chatRoomInfo.unread
+                                  //     ? BoxDecoration(
+                                  //         borderRadius: BorderRadius.all(
+                                  //           Radius.circular(40),
+                                  //         ),
+                                  //         border: Border.all(
+                                  //           width: 2,
+                                  //           color: Theme.of(context).primaryColor,
+                                  //         ),
+                                  //         boxShadow: [
+                                  //           BoxShadow(
+                                  //             color: Colors.grey.withOpacity(0.5),
+                                  //             spreadRadius: 2,
+                                  //             blurRadius: 5,
+                                  //           ),
+                                  //         ],
+                                  //       )
+                                  //     : BoxDecoration(
+                                  //         shape: BoxShape.circle,
+                                  //         boxShadow: [
+                                  //           BoxShadow(
+                                  //             color: Colors.grey.withOpacity(0.5),
+                                  //             spreadRadius: 2,
+                                  //             blurRadius: 5,
+                                  //           ),
+                                  //         ],
+                                  //       ),
+                                  // child: CircleAvatar(
+                                  //     radius: 35,
+                                  //     backgroundImage: NetworkImage(
+                                  //       chatRoomInfo.imageURL != null
+                                  //           ? chatRoomInfo.imageURL
+                                  //           : 'https://lh3.googleusercontent.com/a-/AOh14GiuniKkAaWf6ljNRUQD6Wszn8MVEznIOA-e26n9jg=s88-c-k-c0x00ffffff-no-rj-mo',
+                                  //     )),
+                                  child: ClipOval(
+                                    child: Container(
+                                      child: chatRoomInfo.imageURL != null
+                                          ? Image.network(
+                                              chatRoomInfo.imageURL,
+                                              width: 75,
+                                              height: 75,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, object,
+                                                  stackTrace) {
+                                                return Icon(
+                                                    Icons.account_circle,
+                                                    size: 75);
+                                              },
+                                            )
+                                          : Icon(Icons.account_circle,
+                                              size: 75),
                                     ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Container(
-                                      alignment: Alignment.topLeft,
-                                      child: Text(
-                                        chatRoomInfo.resentMessage,
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Colors.black54,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 1,
+                                  ),
+                                ),
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.65,
+                                  padding: EdgeInsets.only(
+                                    left: 20,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            chatRoomInfo.roomName != null
+                                                ? chatRoomInfo.roomName
+                                                : '',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            _fromAtNow(chatRoomInfo.updateAt),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w300,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      Container(
+                                        alignment: Alignment.topLeft,
+                                        child: Text(
+                                          chatRoomInfo.resentMessage,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            // color: Colors.black54,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-          },
+                        );
+                      },
+                    );
+            },
+          ),
         ),
       ),
     );
