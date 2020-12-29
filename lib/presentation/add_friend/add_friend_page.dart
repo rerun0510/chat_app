@@ -38,59 +38,9 @@ class AddFriendPage extends StatelessWidget {
                     body: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: FlatButton(
-                                  onPressed: () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            SearchFriendPage(emailController),
-                                      ),
-                                    );
-                                    // データ再読み込み
-                                    await model.fetchMayBeFriend();
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.search,
-                                        size: 35,
-                                      ),
-                                      Text('検索'),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: FlatButton(
-                                  onPressed: () async {
-                                    await Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => SelectFriendPage(
-                                            groupNameController),
-                                      ),
-                                    );
-                                  },
-                                  child: Column(
-                                    children: [
-                                      Icon(
-                                        Icons.group_add,
-                                        size: 35,
-                                      ),
-                                      Text('グループ作成'),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // メニューボタン
+                        _addMenu(model, context),
+                        // 知り合いかも一覧
                         Container(
                           padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
                           child: Text(
@@ -127,6 +77,62 @@ class AddFriendPage extends StatelessWidget {
     );
   }
 
+  /// 追加メニュー
+  Widget _addMenu(AddFriendModel model, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(15.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: FlatButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchFriendPage(emailController),
+                  ),
+                );
+                // データ再読み込み
+                await model.fetchMayBeFriend();
+              },
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.search,
+                    size: 35,
+                  ),
+                  Text('検索'),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: FlatButton(
+              onPressed: () async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SelectFriendPage(groupNameController),
+                  ),
+                );
+              },
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.group_add,
+                    size: 35,
+                  ),
+                  Text('グループ作成'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 知り合いかも一覧
   Widget _mayByFriendList(AddFriendModel model) {
     final List<MyFriends> myFriends = model.myFriends;
     return ListView.builder(

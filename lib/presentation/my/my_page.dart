@@ -214,6 +214,7 @@ class MyPage extends StatelessWidget {
     );
   }
 
+  /// カメラアイコン
   Widget cameraIcon() {
     return Container(
       decoration: BoxDecoration(
