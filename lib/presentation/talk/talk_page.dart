@@ -173,7 +173,7 @@ class TalkPage extends StatelessWidget {
                     alignment: Alignment.topRight,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.80,
+                        maxWidth: MediaQuery.of(context).size.width * 0.70,
                       ),
                       padding: EdgeInsets.all(10),
                       margin: EdgeInsets.symmetric(vertical: 10),
@@ -296,7 +296,7 @@ class TalkPage extends StatelessWidget {
                     alignment: Alignment.topLeft,
                     child: Container(
                       constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.80,
+                        maxWidth: MediaQuery.of(context).size.width * 0.70,
                       ),
                       padding: EdgeInsets.all(10),
                       margin: EdgeInsets.symmetric(vertical: 10),

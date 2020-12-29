@@ -15,7 +15,7 @@ class UserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController textEditingController = TextEditingController();
-    ;
+
     return ChangeNotifierProvider<UserModel>(
       create: (_) => UserModel(myGroups, myFriends),
       child: Consumer<UserModel>(
@@ -31,12 +31,13 @@ class UserPage extends StatelessWidget {
                 : Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                          image: NetworkImage(model.backgroundImage),
-                          fit: BoxFit.cover),
+                        image: NetworkImage(model.backgroundImage),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                     child: SafeArea(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(2, 50, 2, 0),
+                        padding: EdgeInsets.fromLTRB(2, 30, 2, 0),
                         child: Center(
                           child: Column(
                             children: [
@@ -100,12 +101,20 @@ class UserPage extends StatelessWidget {
                                       padding: const EdgeInsets.all(8.0),
                                       child: _userImage(model),
                                     ),
-                                    Text(
-                                      model.name != null ? model.name : '',
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: MediaQuery.of(context).size.width *
+                                          0.7,
+                                      child: Text(
+                                        model.name != null ? model.name : '',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
                                       ),
                                     ),
                                   ],

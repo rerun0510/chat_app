@@ -10,47 +10,51 @@ class HomePage extends StatelessWidget {
     return ChangeNotifierProvider<HomeModel>(
       create: (_) => HomeModel(),
       child: Scaffold(
-        body: Consumer<HomeModel>(
-          builder: (context, model, child) {
-            final int groupsCnt = model.myGroupsList.length;
-            final int friendsCnt = model.myFriendsList.length;
-            return model.isLoading
-                ? Container(
-                    color: Colors.grey.withOpacity(0.8),
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                : Container(
-                    child: ListView(
-                      children: [
-                        Container(
-                          child: _myAccount(model, context),
-                        ),
-                        ExpansionTile(
-                          initiallyExpanded: false,
-                          title: Row(
-                            children: [
-                              Icon(Icons.group),
-                              Text(' グループ $groupsCnt')
-                            ],
+        body: Container(
+          color: Colors.white10,
+          child: Consumer<HomeModel>(
+            builder: (context, model, child) {
+              final int groupsCnt = model.myGroupsList.length;
+              final int friendsCnt = model.myFriendsList.length;
+              return model.isLoading
+                  ? Container(
+                      color: Colors.grey.withOpacity(0.8),
+                      child: Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : Container(
+                      color: Colors.white10,
+                      child: ListView(
+                        children: [
+                          Container(
+                            child: _myAccount(model, context),
                           ),
-                          children: _groupListTile(model, context),
-                        ),
-                        ExpansionTile(
-                          initiallyExpanded: false,
-                          title: Row(
-                            children: [
-                              Icon(Icons.person),
-                              Text(' 友達 $friendsCnt'),
-                            ],
+                          ExpansionTile(
+                            initiallyExpanded: false,
+                            title: Row(
+                              children: [
+                                Icon(Icons.group),
+                                Text(' グループ $groupsCnt')
+                              ],
+                            ),
+                            children: _groupListTile(model, context),
                           ),
-                          children: _friendListTile(model, context),
-                        ),
-                      ],
-                    ),
-                  );
-          },
+                          ExpansionTile(
+                            initiallyExpanded: false,
+                            title: Row(
+                              children: [
+                                Icon(Icons.person),
+                                Text(' 友達 $friendsCnt'),
+                              ],
+                            ),
+                            children: _friendListTile(model, context),
+                          ),
+                        ],
+                      ),
+                    );
+            },
+          ),
         ),
       ),
     );
@@ -76,22 +80,8 @@ class HomePage extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Container(
-              padding: EdgeInsets.all(2),
-              child: ClipOval(
-                child: users.imageURL != ''
-                    ? Image.network(
-                        users.imageURL,
-                        width: 55,
-                        height: 55,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(Icons.account_circle, size: 55);
-                        },
-                      )
-                    : Icon(Icons.account_circle, size: 55),
-              ),
-            ),
+            // ユーザーのアイコン
+            _userImage(users.imageURL, 55.0),
             Container(
               width: MediaQuery.of(context).size.width * 0.65,
               padding: EdgeInsets.only(
@@ -103,6 +93,8 @@ class HomePage extends StatelessWidget {
                   fontSize: 18,
                   fontWeight: FontWeight.w900,
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ],
@@ -125,22 +117,7 @@ class HomePage extends StatelessWidget {
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-            leading: Container(
-              padding: EdgeInsets.all(2),
-              child: ClipOval(
-                child: group.imageURL != null
-                    ? Image.network(
-                        group.imageURL,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(Icons.account_circle, size: 50);
-                        },
-                      )
-                    : Icon(Icons.account_circle, size: 50),
-              ),
-            ),
+            leading: _userImage(group.imageURL, 50.0),
             title: Container(
               width: MediaQuery.of(context).size.width * 0.65,
               child: Text(
@@ -172,22 +149,7 @@ class HomePage extends StatelessWidget {
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-            leading: Container(
-              padding: EdgeInsets.all(2),
-              child: ClipOval(
-                child: friend.imageURL != ''
-                    ? Image.network(
-                        friend.imageURL,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, object, stackTrace) {
-                          return Icon(Icons.account_circle, size: 50);
-                        },
-                      )
-                    : Icon(Icons.account_circle, size: 50),
-              ),
-            ),
+            leading: _userImage(friend.imageURL, 50.0),
             title: Container(
               width: MediaQuery.of(context).size.width * 0.65,
               child: Text(
@@ -203,5 +165,28 @@ class HomePage extends StatelessWidget {
           ),
         )
         .toList();
+  }
+
+  /// ユーザーのアイコン
+  Widget _userImage(String imageURL, double size) {
+    return Container(
+      padding: EdgeInsets.all(2),
+      child: ClipOval(
+        child: Container(
+          color: Colors.white,
+          child: imageURL != ''
+              ? Image.network(
+                  imageURL,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, object, stackTrace) {
+                    return Icon(Icons.account_circle, size: size);
+                  },
+                )
+              : Icon(Icons.account_circle, size: size),
+        ),
+      ),
+    );
   }
 }
