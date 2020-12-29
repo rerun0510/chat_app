@@ -23,34 +23,43 @@ class SignInModel extends ChangeNotifier {
   }
 
   Future signInWithGoogle() async {
-    //サインイン画面が表示
-    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
-    final GoogleSignInAuthentication googleSignInAuthentication =
-        await googleSignInAccount.authentication;
-
     startLoading();
 
-    //firebase側に登録
-    final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
+    try {
+      //サインイン画面を表示
+      final GoogleSignInAccount googleAccount = await googleSignIn.signIn();
+      final GoogleSignInAuthentication googleAuth =
+          await googleAccount.authentication;
 
-    //userのid取得
-    final User user = (await _auth.signInWithCredential(credential)).user;
+      //firebase側に登録
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
 
-    assert(!user.isAnonymous);
-    assert(await user.getIdToken() != null);
+      //userのid取得
+      final User user = (await _auth.signInWithCredential(credential)).user;
 
-    this.currentUser = _auth.currentUser;
-    assert(user.uid == currentUser.uid);
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
 
-    // 登録済みのユーザの判定
-    final docs = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(this.currentUser.uid)
-        .get();
-    this.users = Users(docs);
+      this.currentUser = _auth.currentUser;
+      assert(user.uid == currentUser.uid);
+
+      // 登録済みのユーザの判定
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(this.currentUser.uid)
+          .get();
+      if (doc.exists) {
+        this.users = Users(doc);
+      }
+    } catch (e) {
+      print(e);
+      throw ('エラーが発生しました');
+    } finally {
+      endLoading();
+    }
 
     endLoading();
   }

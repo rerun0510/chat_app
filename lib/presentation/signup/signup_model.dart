@@ -18,6 +18,7 @@ class SignUpModel extends ChangeNotifier {
 
   Future _init() async {
     try {
+      // アイコン初期設定
       final random = math.Random().nextInt(2);
       if (random == 0) {
         this.imageFile =
@@ -26,6 +27,9 @@ class SignUpModel extends ChangeNotifier {
         this.imageFile = await getImageFileFromAssets(
             'resources/pose_pien_uruuru_woman.png');
       }
+      // 背景初期設定
+      this.backgroundImage =
+          await getImageFileFromAssets('resources/mountain_00001.jpg');
     } catch (e) {
       print(e);
       throw ('エラーが発生しました');
@@ -36,6 +40,7 @@ class SignUpModel extends ChangeNotifier {
 
   String name;
   File imageFile;
+  File backgroundImage;
   bool isLoading = false;
   Users currentUser;
 
@@ -72,6 +77,7 @@ class SignUpModel extends ChangeNotifier {
       throw ('名前を入力してください。');
     }
     final imageURL = await _uploadImage(currentUser);
+    final backgroundImage = await _uploadBackgroundImage(currentUser);
 
     await FirebaseFirestore.instance
         .collection('users')
@@ -80,6 +86,7 @@ class SignUpModel extends ChangeNotifier {
       {
         'name': name,
         'imageURL': imageURL,
+        'backgroundImage': backgroundImage,
         'email': currentUser.email,
       },
     );
@@ -91,8 +98,21 @@ class SignUpModel extends ChangeNotifier {
   Future<String> _uploadImage(User currentUser) async {
     String uid = currentUser.uid;
     final storage = FirebaseStorage.instance;
-    TaskSnapshot snapshot =
-        await storage.ref().child("users/$uid/ProfileIcon").putFile(imageFile);
+    TaskSnapshot snapshot = await storage
+        .ref()
+        .child("users/$uid/ProfileIcon")
+        .putFile(this.imageFile);
+    final String downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  Future<String> _uploadBackgroundImage(User currentUser) async {
+    String uid = currentUser.uid;
+    final storage = FirebaseStorage.instance;
+    TaskSnapshot snapshot = await storage
+        .ref()
+        .child("users/$uid/BackgroundImage")
+        .putFile(this.backgroundImage);
     final String downloadUrl = await snapshot.ref.getDownloadURL();
     return downloadUrl;
   }

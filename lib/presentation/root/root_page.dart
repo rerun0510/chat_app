@@ -25,7 +25,7 @@ class RootPage extends StatelessWidget {
                           child: CircularProgressIndicator(),
                         ),
                       )
-                    : _convertPage(model.user, model.currentUser);
+                    : _convertPage(model.currentUser);
               },
             ),
           ),
@@ -34,8 +34,8 @@ class RootPage extends StatelessWidget {
     );
   }
 
-  Widget _convertPage(User user, Users users) {
-    if (user == null) {
+  Widget _convertPage(Users currentUser) {
+    if (currentUser == null) {
       return SignInPage();
     } else {
       if (debug) {
