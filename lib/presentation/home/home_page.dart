@@ -120,14 +120,24 @@ class HomePage extends StatelessWidget {
             leading: _userImage(group.imageURL, 50.0),
             title: Container(
               width: MediaQuery.of(context).size.width * 0.65,
-              child: Text(
-                group.groupsName != '' ? group.groupsName : '',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
+              child: Row(
+                children: [
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.6,
+                    ),
+                    child: Text(
+                      group.groupsName != '' ? group.groupsName : '',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  Text('(${group.memberCnt.toString()})'),
+                ],
               ),
             ),
           ),

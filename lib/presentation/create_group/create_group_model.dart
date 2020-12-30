@@ -135,7 +135,7 @@ class CreateGroupModel extends ChangeNotifier {
       final groupsRef =
           await FirebaseFirestore.instance.collection('groups').add({
         'groupName': this.groupName,
-        'imageURL': null,
+        'memberCnt': this.selectedMyFriends.length,
       });
 
       // imageURLを追加

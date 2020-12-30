@@ -15,4 +15,5 @@ class MyGroups {
   String groupsName;
   String imageURL;
   String backgroundImage;
+  int memberCnt;
 }

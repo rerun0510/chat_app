@@ -62,6 +62,7 @@ class HomeModel extends ChangeNotifier {
           this.myGroupsList[i].groupsName = doc['groupName'];
           this.myGroupsList[i].imageURL = doc['imageURL'];
           this.myGroupsList[i].backgroundImage = doc['backgroundImage'];
+          this.myGroupsList[i].memberCnt = doc['memberCnt'];
           notifyListeners();
         });
       }
