@@ -69,7 +69,7 @@ class HomePage extends StatelessWidget {
         await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) => UserPage(null, null),
+          builder: (context) => UserPage(null, null, false),
         );
         await model.reload();
       },
@@ -113,7 +113,7 @@ class HomePage extends StatelessWidget {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(group, null),
+                builder: (context) => UserPage(group, null, false),
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
@@ -145,7 +145,7 @@ class HomePage extends StatelessWidget {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(null, friend),
+                builder: (context) => UserPage(null, friend, false),
               );
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),

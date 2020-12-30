@@ -41,7 +41,7 @@ class HomePageAppBar {
               await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(result, null),
+                builder: (context) => UserPage(result, null, false),
               );
             }
           },

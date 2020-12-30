@@ -7,10 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatelessWidget {
-  UserPage(this.myGroups, this.myFriends);
+  UserPage(this.myGroups, this.myFriends, this.talkPageFlg);
 
   final MyFriends myFriends;
   final MyGroups myGroups;
+  final bool talkPageFlg;
 
   @override
   Widget build(BuildContext context) {
@@ -188,7 +189,11 @@ class UserPage extends StatelessWidget {
             ),
             onPressed: () async {
               // トーク画面に遷移
-              Navigator.of(context, rootNavigator: false).pop();
+              Navigator.of(context).pop();
+              // トーク画面 → ユーザー画面 → トーク画面で遷移が行われている場合２回popする
+              if (this.talkPageFlg) {
+                Navigator.of(context).pop();
+              }
               await Navigator.push(
                 context,
                 MaterialPageRoute(

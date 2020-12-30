@@ -147,7 +147,7 @@ class AddFriendPage extends StatelessWidget {
                 context: context,
                 isScrollControlled: true,
                 useRootNavigator: true,
-                builder: (context) => UserPage(null, myFriend),
+                builder: (context) => UserPage(null, myFriend, false),
               );
               // データ再読み込み
               await model.fetchMayBeFriend();

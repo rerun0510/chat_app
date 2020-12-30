@@ -1,7 +1,9 @@
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/messages.dart';
+import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/talk/talk_model.dart';
+import 'package:chat_app/presentation/user/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +18,7 @@ class TalkPage extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isSameUser;
     bool isAnotherDay;
+    bool isAnotherTime;
     return ChangeNotifierProvider<TalkModel>(
       create: (_) => TalkModel(chatRoomInfo),
       child: GestureDetector(
@@ -55,7 +58,11 @@ class TalkPage extends StatelessWidget {
                                     .format(messages.createdAt) !=
                                 DateFormat('yyyy/MM/dd').format(
                                     model.messages[index + 1].createdAt);
-                            if (isAnotherDay) {
+                            isAnotherTime = DateFormat('HH:mm')
+                                    .format(messages.createdAt) !=
+                                DateFormat('HH:mm').format(
+                                    model.messages[index + 1].createdAt);
+                            if (isAnotherTime) {
                               // 日付を跨いで連投した場合はアイコンを再表示
                               isSameUser = false;
                             }
@@ -63,6 +70,7 @@ class TalkPage extends StatelessWidget {
                             // 次のデータが存在しない場合
                             isSameUser = false;
                             isAnotherDay = true;
+                            isAnotherTime = true;
                           }
 
                           return _chatBubble(model, messages, context, isMe,
@@ -81,6 +89,7 @@ class TalkPage extends StatelessWidget {
     );
   }
 
+  /// チャットバブル
   Widget _chatBubble(TalkModel model, Messages messages, BuildContext context,
       bool isMe, bool isSameUser, bool isAnotherDay, int index) {
     if (isMe) {
@@ -239,38 +248,49 @@ class TalkPage extends StatelessWidget {
               !isSameUser
                   ? Row(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: Colors.grey.withOpacity(0.5),
-                            //     blurRadius: 5,
-                            //   )
-                            // ],
-                          ),
-                          // child: CircleAvatar(
-                          //   radius: 15,
-                          //   backgroundImage: NetworkImage(
-                          //     _getUserImage(model.usersList, messages.userId),
-                          //   ),
-                          // ),
-                          child: ClipOval(
-                            child: Container(
-                              color: Colors.white,
-                              child: imageURL != null
-                                  ? Image.network(
-                                      imageURL,
-                                      width: 35,
-                                      height: 35,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, object, stackTrace) {
-                                        return Icon(Icons.account_circle,
-                                            size: 50);
-                                      },
-                                    )
-                                  : Icon(Icons.account_circle, size: 50),
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () async {
+                            // ユーザー画面に遷移
+                            MyFriends myFriend =
+                                await model.getUserPageInfo(messages.userId);
+                            await showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (context) => UserPage(
+                                null,
+                                myFriend,
+                                true,
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  blurRadius: 5,
+                                )
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Container(
+                                color: Colors.white,
+                                child: imageURL != null
+                                    ? Image.network(
+                                        imageURL,
+                                        width: 35,
+                                        height: 35,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, object, stackTrace) {
+                                          return Icon(Icons.account_circle,
+                                              size: 35);
+                                        },
+                                      )
+                                    : Icon(Icons.account_circle, size: 35),
+                              ),
                             ),
                           ),
                         ),
@@ -337,6 +357,7 @@ class TalkPage extends StatelessWidget {
     }
   }
 
+  /// メッセージ入力ボックス
   Widget _sendMessageArea(TalkModel model, BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8),
@@ -390,6 +411,7 @@ class TalkPage extends StatelessWidget {
     );
   }
 
+  /// メッセージ送信
   Future _sendMessage(TalkModel model, BuildContext context) async {
     try {
       await model.sendMessage(chatRoomInfo.roomId, model.currentUser.userId);
