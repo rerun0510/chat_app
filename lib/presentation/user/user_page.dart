@@ -53,10 +53,12 @@ class UserPage extends StatelessWidget {
                                     MediaQuery.of(context).size.height * 0.3,
                                 child: Column(
                                   children: [
+                                    // アイコン
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: _userImage(model),
+                                      child: _userImage(model.imageURL, 125.0),
                                     ),
+                                    // 名前
                                     Container(
                                       alignment: Alignment.center,
                                       width: MediaQuery.of(context).size.width *
@@ -72,6 +74,12 @@ class UserPage extends StatelessWidget {
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 2,
                                       ),
+                                    ),
+                                    // メンバーアイコン
+                                    Container(
+                                      child: myGroups != null
+                                          ? _memberIcon(model, context)
+                                          : null,
                                     ),
                                   ],
                                 ),
@@ -138,27 +146,93 @@ class UserPage extends StatelessWidget {
   }
 
   /// ユーザーのアイコン
-  Widget _userImage(UserModel model) {
+  Widget _userImage(String imageURL, double size) {
     return ClipOval(
       child: Container(
         color: Colors.white,
-        child: model.imageURL != ''
+        child: imageURL != ''
             ? Image.network(
-                model.imageURL,
+                imageURL,
                 errorBuilder: (context, object, stackTrace) {
                   return Icon(
                     Icons.account_circle,
-                    size: 125,
+                    size: size,
                   );
                 },
-                width: 125,
-                height: 125,
+                width: size,
+                height: size,
                 fit: BoxFit.cover,
               )
             : Icon(
                 Icons.account_circle,
-                size: 125,
+                size: size,
               ),
+      ),
+    );
+  }
+
+  /// メンバーアイコン
+  Widget _memberIcon(UserModel model, BuildContext context) {
+    final cnt = model.memberIcon.length;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        // メンバー画面に遷移
+        print('メンバー画面に遷移');
+      },
+      child: Container(
+        padding: EdgeInsets.only(top: 16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.only(right: 5, left: 5),
+              child: _userImage(model.memberIcon[0], 35),
+            ),
+            Container(
+              child: cnt > 1
+                  ? Container(
+                      padding: EdgeInsets.only(right: 5, left: 5),
+                      child: _userImage(model.memberIcon[1], 35),
+                    )
+                  : null,
+            ),
+            Container(
+              child: cnt > 2
+                  ? Container(
+                      padding: EdgeInsets.only(right: 5, left: 5),
+                      child: _userImage(model.memberIcon[2], 35),
+                    )
+                  : null,
+            ),
+            Container(
+              child: cnt > 3
+                  ? Container(
+                      padding: EdgeInsets.only(right: 5, left: 5),
+                      child: _userImage(model.memberIcon[3], 35),
+                    )
+                  : null,
+            ),
+            Container(
+              margin: EdgeInsets.only(right: 5, left: 5),
+              height: 35,
+              decoration: BoxDecoration(
+                color: Colors.lightBlue,
+                border: Border.all(color: Colors.lightBlue),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Container(
+                margin: EdgeInsets.only(right: 15, left: 15),
+                alignment: Alignment.center,
+                child: Text(
+                  '${model.memberCnt.toString()} >',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

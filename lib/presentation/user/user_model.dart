@@ -19,6 +19,8 @@ class UserModel extends ChangeNotifier {
   String backgroundImage = '';
   bool isMe = false;
   bool isFriend = true;
+  List<String> memberIcon = [];
+  int memberCnt;
 
   ChatRoomInfo chatRoomInfo;
 
@@ -33,6 +35,7 @@ class UserModel extends ChangeNotifier {
         this.imageURL = myGroups.imageURL;
         this.backgroundImage = myGroups.backgroundImage;
         fetchChatRoomInfo(myGroups.chatRoomInfoRef, this.currentUser);
+        await _fetchMemberIcon(myGroups.groupsRef);
       } else if (myFriends != null) {
         this.name = myFriends.usersName;
         this.imageURL = myFriends.imageURL;
@@ -105,6 +108,25 @@ class UserModel extends ChangeNotifier {
         });
       }
     });
+  }
+
+  /// グループメンバーのアイコン画像取得
+  Future _fetchMemberIcon(DocumentReference groupsRef) async {
+    final currentUserRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.userId);
+    this.memberIcon.add(this.currentUser.imageURL);
+    final docs = await groupsRef
+        .collection('member')
+        .where('usersRef', isNotEqualTo: currentUserRef)
+        .get();
+    final usersRefList = docs.docs.map((doc) => doc['usersRef']).toList();
+    final to = usersRefList.length > 4 ? 3 : usersRefList.length;
+    this.memberCnt = usersRefList.length + 1;
+    for (int i = 0; i < to; i++) {
+      final a = await usersRefList[i].get();
+      this.memberIcon.add(a['imageURL']);
+    }
   }
 
   /// プロフィール再表示
