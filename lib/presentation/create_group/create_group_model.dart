@@ -21,6 +21,7 @@ class CreateGroupModel extends ChangeNotifier {
   bool clearBtnFlg = false;
   String groupName = '';
   File imageFile;
+  File backgroundImage;
   MyGroups myGroups;
 
   _init(List<Map> selectedMyFriends) async {
@@ -29,6 +30,9 @@ class CreateGroupModel extends ChangeNotifier {
       // デフォルトアイコンの設定
       this.imageFile =
           await getImageFileFromAssets('resources/group_young_world.png');
+      // 背景初期設定
+      this.backgroundImage =
+          await getImageFileFromAssets('resources/mountain_00001.jpg');
 
       // currentUser取得
       this.currentUser = await fetchCurrentUser();
@@ -113,6 +117,16 @@ class CreateGroupModel extends ChangeNotifier {
     return downloadUrl;
   }
 
+  Future<String> _uploadBackgroundImage(String groupId) async {
+    final storage = FirebaseStorage.instance;
+    TaskSnapshot snapshot = await storage
+        .ref()
+        .child("groups/$groupId/BackgroundImage")
+        .putFile(this.backgroundImage);
+    final String downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
   /// グループを作成する
   Future createGroup() async {
     this.startLoading();
@@ -127,7 +141,15 @@ class CreateGroupModel extends ChangeNotifier {
       // imageURLを追加
       await groupsRef.update({
         'imageURL': await _uploadImage(groupsRef.id),
+        'backgroundImage': await _uploadBackgroundImage(groupsRef.id),
       });
+
+      // groups/member 追加
+      for (Map selected in this.selectedMyFriends) {
+        await groupsRef.collection('member').doc(selected['userId']).set({
+          'usersRef': selected['usersRef'],
+        });
+      }
 
       // '/chatRoom/(ルームID)'を新規作成
       final roomRef =
@@ -182,6 +204,7 @@ class CreateGroupModel extends ChangeNotifier {
           final groupsDoc = await this.myGroups.groupsRef.get();
           this.myGroups.groupsName = groupsDoc['groupName'];
           this.myGroups.imageURL = groupsDoc['imageURL'];
+          this.myGroups.backgroundImage = groupsDoc['backgroundImage'];
         }
       }
     } catch (e) {
