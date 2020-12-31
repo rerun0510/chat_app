@@ -14,11 +14,13 @@ class UserModel extends ChangeNotifier {
 
   Users currentUser;
   bool isLoading = false;
+  String id = '';
   String name = '';
   String imageURL = '';
   String backgroundImage = '';
   bool isMe = false;
   bool isFriend = true;
+  bool isGroup = false;
   List<String> memberIcon = [];
   int memberCnt;
 
@@ -31,18 +33,22 @@ class UserModel extends ChangeNotifier {
       this.currentUser = await fetchCurrentUser();
 
       if (myGroups != null) {
+        this.id = myGroups.groupsId;
         this.name = myGroups.groupsName;
         this.imageURL = myGroups.imageURL;
         this.backgroundImage = myGroups.backgroundImage;
+        this.isGroup = true;
         fetchChatRoomInfo(myGroups.chatRoomInfoRef, this.currentUser);
         await _fetchMemberIcon(myGroups.groupsRef);
       } else if (myFriends != null) {
+        this.id = myFriends.usersId;
         this.name = myFriends.usersName;
         this.imageURL = myFriends.imageURL;
         this.backgroundImage = myFriends.backgroundImage;
         fetchChatRoomInfo(myFriends.chatRoomInfoRef, this.currentUser);
         this.isFriend = myFriends.friendFlg;
       } else {
+        this.id = this.currentUser.userId;
         this.name = this.currentUser.name;
         this.imageURL = this.currentUser.imageURL;
         this.backgroundImage = this.currentUser.backgroundImage;

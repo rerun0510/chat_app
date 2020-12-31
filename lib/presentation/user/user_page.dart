@@ -3,6 +3,7 @@ import 'package:chat_app/domain/myGroups.dart';
 import 'package:chat_app/presentation/my/my_page.dart';
 import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:chat_app/presentation/user/user_model.dart';
+import 'package:chat_app/presentation/user_image/user_image_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,67 +30,105 @@ class UserPage extends StatelessWidget {
                       child: CircularProgressIndicator(),
                     ),
                   )
-                : Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(model.backgroundImage),
-                        fit: BoxFit.cover,
+                : GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () async {
+                      // 画像表示画面に遷移
+                      await showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (context) => UserImagePage(
+                            model.id, model.isMe, model.isGroup, false),
+                      );
+                      // 画像変更後のリロード
+                      if (model.isMe) {
+                        await model.reload();
+                      }
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(model.backgroundImage),
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                    child: SafeArea(
-                      child: Container(
-                        padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
-                        child: Center(
-                          child: Column(
-                            children: [
-                              // AppBar
-                              _appBar(model, controller, context),
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.25,
-                              ),
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                child: Column(
-                                  children: [
-                                    // アイコン
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: _userImage(model.imageURL, 125.0),
-                                    ),
-                                    // 名前
-                                    Container(
-                                      alignment: Alignment.center,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.7,
-                                      child: Text(
-                                        model.name != null ? model.name : '',
-                                        style: TextStyle(
-                                          fontSize: 25,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                    // メンバーアイコン
-                                    Container(
-                                      child: myGroups != null
-                                          ? _memberIcon(model, context)
-                                          : null,
-                                    ),
-                                  ],
+                      child: SafeArea(
+                        child: Container(
+                          padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
+                          child: Center(
+                            child: Column(
+                              children: [
+                                // AppBar
+                                _appBar(model, controller, context),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.1,
                                 ),
-                              ),
-                              SizedBox(
-                                height:
-                                    MediaQuery.of(context).size.height * 0.15,
-                                child: _btn(model, context),
-                              ),
-                            ],
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.4,
+                                  child: Column(
+                                    children: [
+                                      // アイコン
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: GestureDetector(
+                                          onTap: () async {
+                                            // 画像表示画面に遷移
+                                            await showModalBottomSheet(
+                                              context: context,
+                                              isScrollControlled: true,
+                                              builder: (context) =>
+                                                  UserImagePage(
+                                                      model.id,
+                                                      model.isMe,
+                                                      model.isGroup,
+                                                      true),
+                                            );
+                                            // 画像変更後のリロード
+                                            if (model.isMe) {
+                                              await model.reload();
+                                            }
+                                          },
+                                          behavior: HitTestBehavior.opaque,
+                                          child:
+                                              _userImage(model.imageURL, 125.0),
+                                        ),
+                                      ),
+                                      // 名前
+                                      Container(
+                                        alignment: Alignment.center,
+                                        width:
+                                            MediaQuery.of(context).size.width *
+                                                0.7,
+                                        child: Text(
+                                          model.name != null ? model.name : '',
+                                          style: TextStyle(
+                                            fontSize: 25,
+                                            fontWeight: FontWeight.w900,
+                                            color: Colors.white,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                      // メンバーアイコン
+                                      Container(
+                                        child: myGroups != null
+                                            ? _memberIcon(model, context)
+                                            : null,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.15,
+                                  child: _btn(model, context),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -135,7 +174,7 @@ class UserPage extends StatelessWidget {
                     await model.reload();
                   },
                   icon: Icon(
-                    Icons.edit,
+                    Icons.settings,
                     color: Colors.white,
                   ),
                 )
