@@ -58,7 +58,7 @@ class MyModel extends ChangeNotifier {
 
     // currentUser取得
     this.currentUser = await fetchCurrentUser();
-    notifyListeners();
+    endLoading();
   }
 
   Future showImagePickerBackground() async {
@@ -79,7 +79,6 @@ class MyModel extends ChangeNotifier {
     // currentUser取得
     this.currentUser = await fetchCurrentUser();
     endLoading();
-    notifyListeners();
   }
 
   Future<String> _uploadImageIcon() async {
