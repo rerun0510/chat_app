@@ -39,20 +39,25 @@ class TalkListPage extends StatelessWidget {
                             );
                           },
                           child: Container(
-                            height: 110,
+                            height: 100,
                             padding: EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 15,
+                              horizontal: 15,
+                              vertical: 10,
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
+                                    // アイコン
                                     Container(
                                       padding: EdgeInsets.all(2),
+                                      width: 75,
+                                      // color: Colors.yellow,
                                       child: ClipOval(
                                         child: Container(
+                                          width: 75,
+                                          height: 75,
                                           color: Colors.white,
                                           child: chatRoomInfo.imageURL != null
                                               ? Image.network(
@@ -72,9 +77,11 @@ class TalkListPage extends StatelessWidget {
                                         ),
                                       ),
                                     ),
+                                    // 名前 ＋ メッセージ
                                     Container(
+                                      // color: Colors.red,
                                       width: MediaQuery.of(context).size.width *
-                                          0.55,
+                                          0.5,
                                       padding: EdgeInsets.only(
                                         left: 10,
                                       ),
@@ -112,18 +119,54 @@ class TalkListPage extends StatelessWidget {
                                   ],
                                 ),
                                 Container(
+                                  // color: Colors.green,
                                   height: 100,
                                   padding: EdgeInsets.all(2),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.2,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        _fromAtNow(chatRoomInfo.updateAt),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w300,
-                                          color: Colors.black54,
+                                      Container(
+                                        height: 20,
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          _fromAtNow(chatRoomInfo.updateAt),
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w300,
+                                            color: Colors.black54,
+                                          ),
                                         ),
+                                      ),
+                                      Container(
+                                        alignment: Alignment.centerRight,
+                                        height: 50,
+                                        child: chatRoomInfo.unread != 0
+                                            ? Container(
+                                                width: 40,
+                                                height: 40,
+                                                child: ClipOval(
+                                                  child: Container(
+                                                    color: Colors.blue,
+                                                    alignment: Alignment.center,
+                                                    child: Text(
+                                                      chatRoomInfo.unread > 999
+                                                          ? '999+'
+                                                          : chatRoomInfo.unread
+                                                              .toInt()
+                                                              .toString(),
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        fontSize: 13,
+                                                        color: Colors.white,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            : null,
                                       ),
                                     ],
                                   ),

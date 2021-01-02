@@ -21,71 +21,71 @@ class TalkPage extends StatelessWidget {
     bool isAnotherTime;
     return ChangeNotifierProvider<TalkModel>(
       create: (_) => TalkModel(chatRoomInfo),
-      child: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+      child: Consumer<TalkModel>(builder: (context, model, child) {
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back_ios),
+                onPressed: () {
+                  // トーク画面を閉じる際にサブスクリプションのキャンセルを行う
+                  model.subscriptionCancel();
+                  Navigator.of(context).pop();
+                },
+              ),
+              title: Text(chatRoomInfo.roomName),
             ),
-            title: Text(chatRoomInfo.roomName),
-          ),
-          body: Container(
-            color: Colors.white10,
-            child: Consumer<TalkModel>(
-              builder: (context, model, child) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        reverse: true,
-                        padding: EdgeInsets.all(20),
-                        itemCount: model.messages.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          final Messages messages = model.messages[index];
+            body: Container(
+              color: Colors.white10,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      reverse: true,
+                      padding: EdgeInsets.all(20),
+                      itemCount: model.messages.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        final Messages messages = model.messages[index];
 
-                          final bool isMe = model.messages[index].userId ==
-                              model.currentUser.userId;
+                        final bool isMe = model.messages[index].userId ==
+                            model.currentUser.userId;
 
-                          if (index < model.messages.length - 1) {
-                            // 次のデータと比較する
-                            isSameUser = messages.userId ==
-                                model.messages[index + 1].userId;
-                            isAnotherDay = DateFormat('yyyy/MM/dd')
-                                    .format(messages.createdAt) !=
-                                DateFormat('yyyy/MM/dd').format(
-                                    model.messages[index + 1].createdAt);
-                            isAnotherTime = DateFormat('HH:mm')
-                                    .format(messages.createdAt) !=
-                                DateFormat('HH:mm').format(
-                                    model.messages[index + 1].createdAt);
-                            if (isAnotherTime) {
-                              // 日付を跨いで連投した場合はアイコンを再表示
-                              isSameUser = false;
-                            }
-                          } else {
-                            // 次のデータが存在しない場合
+                        if (index < model.messages.length - 1) {
+                          // 次のデータと比較する
+                          isSameUser = messages.userId ==
+                              model.messages[index + 1].userId;
+                          isAnotherDay = DateFormat('yyyy/MM/dd')
+                                  .format(messages.createdAt) !=
+                              DateFormat('yyyy/MM/dd')
+                                  .format(model.messages[index + 1].createdAt);
+                          isAnotherTime = DateFormat('HH:mm')
+                                  .format(messages.createdAt) !=
+                              DateFormat('HH:mm')
+                                  .format(model.messages[index + 1].createdAt);
+                          if (isAnotherTime) {
+                            // 日付を跨いで連投した場合はアイコンを再表示
                             isSameUser = false;
-                            isAnotherDay = true;
-                            isAnotherTime = true;
                           }
+                        } else {
+                          // 次のデータが存在しない場合
+                          isSameUser = false;
+                          isAnotherDay = true;
+                          isAnotherTime = true;
+                        }
 
-                          return _chatBubble(model, messages, context, isMe,
-                              isSameUser, isAnotherDay, index);
-                        },
-                      ),
+                        return _chatBubble(model, messages, context, isMe,
+                            isSameUser, isAnotherDay, index);
+                      },
                     ),
-                    _sendMessageArea(model, context),
-                  ],
-                );
-              },
+                  ),
+                  _sendMessageArea(model, context),
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -129,15 +129,29 @@ class TalkPage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(6),
-                    child: Text(
-                      DateFormat('HH:mm').format(messages.createdAt),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black45,
+                  Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.fromLTRB(5, 5, 5, 0),
+                        child: Text(
+                          _getReadState(messages.read, model.groupFlg),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black45,
+                          ),
+                        ),
                       ),
-                    ),
+                      Container(
+                        padding: EdgeInsets.fromLTRB(5, 0, 5, 5),
+                        child: Text(
+                          DateFormat('HH:mm').format(messages.createdAt),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black45,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   // GestureDetector(
                   // behavior: HitTestBehavior.opaque,
@@ -339,7 +353,7 @@ class TalkPage extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(6),
+                    padding: EdgeInsets.all(5),
                     child: Text(
                       DateFormat('HH:mm').format(messages.createdAt),
                       style: TextStyle(
@@ -360,53 +374,60 @@ class TalkPage extends StatelessWidget {
   /// メッセージ入力ボックス
   Widget _sendMessageArea(TalkModel model, BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8),
-      height: 70,
       color: Colors.white,
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(Icons.photo_camera_outlined),
-            iconSize: 25,
-            color: Theme.of(context).primaryColor,
-            onPressed: () {},
+      child: SafeArea(
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 8,
+            // vertical: 8,
           ),
-          IconButton(
-            icon: Icon(Icons.insert_photo_outlined),
-            iconSize: 25,
-            color: Theme.of(context).primaryColor,
-            onPressed: () {},
-          ),
-          Expanded(
-            child: TextField(
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-              textInputAction: TextInputAction.newline,
-              controller: messageAreaController,
-              decoration: InputDecoration.collapsed(
-                hintText: 'Send a message..',
+          height: 70,
+          child: Row(
+            children: [
+              IconButton(
+                icon: Icon(Icons.photo_camera_outlined),
+                iconSize: 25,
+                color: Theme.of(context).primaryColor,
+                onPressed: () {},
               ),
-              textCapitalization: TextCapitalization.sentences,
-              onChanged: (text) {
-                model.setMessage(text);
-              },
-            ),
+              IconButton(
+                icon: Icon(Icons.insert_photo_outlined),
+                iconSize: 25,
+                color: Theme.of(context).primaryColor,
+                onPressed: () {},
+              ),
+              Expanded(
+                child: TextField(
+                  keyboardType: TextInputType.multiline,
+                  maxLines: null,
+                  textInputAction: TextInputAction.newline,
+                  controller: messageAreaController,
+                  decoration: InputDecoration.collapsed(
+                    hintText: 'Send a message..',
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  onChanged: (text) {
+                    model.setMessage(text);
+                  },
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.send),
+                iconSize: 25,
+                color: model.message.isNotEmpty
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
+                onPressed: () async {
+                  if (model.message.isNotEmpty) {
+                    messageAreaController.clear();
+                    await _sendMessage(model, context);
+                    model.setMessage('');
+                  }
+                },
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.send),
-            iconSize: 25,
-            color: model.message.isNotEmpty
-                ? Theme.of(context).primaryColor
-                : Colors.grey,
-            onPressed: () async {
-              if (model.message.isNotEmpty) {
-                messageAreaController.clear();
-                await _sendMessage(model, context);
-                model.setMessage('');
-              }
-            },
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -414,7 +435,7 @@ class TalkPage extends StatelessWidget {
   /// メッセージ送信
   Future _sendMessage(TalkModel model, BuildContext context) async {
     try {
-      await model.sendMessage(chatRoomInfo.roomId, model.currentUser.userId);
+      await model.sendMessage();
     } catch (e) {
       showDialog(
         context: context,
@@ -548,6 +569,19 @@ class TalkPage extends StatelessWidget {
         },
       );
     }
+  }
+
+  /// 既読状態の取得
+  String _getReadState(num read, bool groupFlg) {
+    String readState = '';
+    if (read > 0) {
+      if (groupFlg) {
+        readState = '既読 ${read.toInt().toString()}';
+      } else {
+        readState = '既読';
+      }
+    }
+    return readState;
   }
 
   String _fromAtNow(DateTime date) {

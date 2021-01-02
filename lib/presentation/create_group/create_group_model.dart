@@ -135,7 +135,7 @@ class CreateGroupModel extends ChangeNotifier {
       final groupsRef =
           await FirebaseFirestore.instance.collection('groups').add({
         'groupName': this.groupName,
-        'memberCnt': this.selectedMyFriends.length,
+        'memberCnt': 1,
       });
 
       // imageURLを追加
@@ -146,8 +146,11 @@ class CreateGroupModel extends ChangeNotifier {
 
       // groups/member 追加
       for (Map selected in this.selectedMyFriends) {
+        final bool memberFlg =
+            selected['userId'] == this.currentUser.userId ? true : false;
         await groupsRef.collection('member').doc(selected['userId']).set({
           'usersRef': selected['usersRef'],
+          'memberFlg': memberFlg,
         });
       }
 
@@ -160,33 +163,43 @@ class CreateGroupModel extends ChangeNotifier {
 
       // '/chatRoom/(ルームID)/member/'を定義
       final roomMemberRef = roomRef.collection('member');
+      final currentUserRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(this.currentUser.userId);
       // メンバーを追加
-      for (Map selected in this.selectedMyFriends) {
-        await roomMemberRef.doc(selected['userId']).set({
-          'usersRef': selected['usersRef'],
-        });
-      }
+      // for (Map selected in this.selectedMyFriends) {
+      //   await roomMemberRef.doc(selected['userId']).set({
+      //     'usersRef': selected['usersRef'],
+      //   });
+      // }
+      // メンバーを追加(自分のみ)
+      await roomMemberRef.doc(this.currentUser.userId).set({
+        'usersRef': currentUserRef,
+      });
 
       // '/users/(ユーザーID)/chatRoomInfo/(ルームID)/'へデータを追加
-      String initResentMessage = '';
-      for (Map selected in this.selectedMyFriends) {
-        final chatRoomInfoRef =
-            selected['usersRef'].collection('chatRoomInfo').doc(roomRef.id);
-        await chatRoomInfoRef.set({
-          'roomRef': roomRef,
-          'resentMessage': initResentMessage,
-          'updateAt': Timestamp.now(),
-          'visible': true,
-        });
-      }
+      final String initResentMessage = '';
+      // for (Map selected in this.selectedMyFriends) {
+      //   final chatRoomInfoRef =
+      //       selected['usersRef'].collection('chatRoomInfo').doc(roomRef.id);
+      //   await chatRoomInfoRef.set({
+      //     'roomRef': roomRef,
+      //     'resentMessage': initResentMessage,
+      //     'updateAt': Timestamp.now(),
+      //     'visible': true,
+      //   });
+      // }
+      await currentUserRef.collection('chatRoomInfo').doc(roomRef.id).set({
+        'roomRef': roomRef,
+        'resentMessage': initResentMessage,
+        'updateAt': Timestamp.now(),
+        'visible': true,
+      });
 
       // '/users/(ユーザーID)/groups/'にグループ情報を追加
       for (Map selected in this.selectedMyFriends) {
-        bool memberFlg = false;
-        // 自分自身の場合は、memberFlg: true
-        if (selected['userId'] == this.currentUser.userId) {
-          memberFlg = true;
-        }
+        final bool memberFlg =
+            selected['userId'] == this.currentUser.userId ? true : false;
         final DocumentReference myGroupsRef =
             selected['usersRef'].collection('groups').doc(groupsRef.id);
         await myGroupsRef.set(

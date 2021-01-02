@@ -6,7 +6,7 @@ class ChatRoomInfo {
     resentMessage = doc['resentMessage'];
     updateAt = doc['updateAt'].toDate();
     roomRef = doc['roomRef'];
-    unread = true;
+    unread = doc['unread'];
     visible = doc['visible'];
   }
 
@@ -14,7 +14,7 @@ class ChatRoomInfo {
   String resentMessage;
   DateTime updateAt;
   DocumentReference roomRef;
-  bool unread;
+  num unread;
   bool visible;
   String roomName;
   String imageURL;

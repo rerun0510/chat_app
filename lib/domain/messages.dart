@@ -7,6 +7,7 @@ class Messages {
     message = doc['message'];
     messageType = doc['messageType'];
     createdAt = doc['createdAt'].toDate();
+    read = doc['read'];
   }
 
   String userId;
@@ -14,4 +15,5 @@ class Messages {
   String message;
   String messageType;
   DateTime createdAt;
+  num read;
 }

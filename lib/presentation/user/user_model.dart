@@ -125,6 +125,7 @@ class UserModel extends ChangeNotifier {
     final docs = await groupsRef
         .collection('member')
         .where('usersRef', isNotEqualTo: currentUserRef)
+        .where('memberFlg', isEqualTo: true)
         .get();
     final usersRefList = docs.docs.map((doc) => doc['usersRef']).toList();
     final to = usersRefList.length > 4 ? 3 : usersRefList.length;

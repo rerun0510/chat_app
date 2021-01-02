@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/member.dart';
 import 'package:chat_app/domain/messages.dart';
@@ -17,17 +19,42 @@ class TalkModel extends ChangeNotifier {
   List<Users> usersList = [];
   String message = '';
   bool updateFlg = true;
+  bool groupFlg = false;
   Users currentUser;
+  ChatRoomInfo chatRoomInfo;
+  StreamSubscription<QuerySnapshot> messageListeners;
+  StreamSubscription<DocumentSnapshot> chatRoomInfoListeners;
+  StreamSubscription<QuerySnapshot> unreadMessageListeners;
 
   Future _init(ChatRoomInfo chatRoomInfo) async {
     // currentUser取得
     this.currentUser = await fetchCurrentUser();
-    fetchMessages(chatRoomInfo);
+    this.chatRoomInfo = chatRoomInfo;
+    await fetchGroupFlg();
+    await fetchMessages();
+  }
+
+  // サブスクリプションのキャンセル
+  void subscriptionCancel() {
+    messageListeners.cancel();
+    chatRoomInfoListeners.cancel();
+    unreadMessageListeners.cancel();
+  }
+
+  /// groupFlgの取得
+  Future fetchGroupFlg() async {
+    final doc = await this.chatRoomInfo.roomRef.get();
+    this.groupFlg = doc['groupFlg'];
   }
 
   /// メッセージ取得
-  Future fetchMessages(ChatRoomInfo chatRoomInfo) async {
-    final members = await chatRoomInfo.roomRef.collection('member').get();
+  Future fetchMessages() async {
+    final chatRoomInfoRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.userId)
+        .collection('chatRoomInfo')
+        .doc(this.chatRoomInfo.roomId);
+    final members = await this.chatRoomInfo.roomRef.collection('member').get();
     final docs = members.docs;
     final memberList = docs.map((doc) => Member(doc)).toList();
     this.memberList = memberList;
@@ -37,17 +64,52 @@ class TalkModel extends ChangeNotifier {
       this.usersList.add(Users(doc));
     }
 
-    final snapshots = chatRoomInfo.roomRef
+    final messageSnapshots = this
+        .chatRoomInfo
+        .roomRef
         .collection('messages')
         .orderBy('createdAt', descending: true)
         .snapshots();
-    snapshots.listen((snapshot) {
+    this.messageListeners = messageSnapshots.listen((snapshot) {
+      // メッセージ受信
       final docs = snapshot.docs;
-      // todo ソートする
       final messageList = docs.map((doc) => Messages(doc)).toList();
       messageList.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       this.messages = messageList;
       notifyListeners();
+    });
+
+    // 未読数の更新
+    final chatRoomInfoSnapshots = chatRoomInfoRef.snapshots();
+    this.chatRoomInfoListeners = chatRoomInfoSnapshots.listen((snapshot) {
+      snapshot.reference.update({
+        'unread': 0,
+      });
+    });
+    // 未読メッセージを既読に更新
+    final unreadMessageSnapshots =
+        chatRoomInfoRef.collection('unreadMessage').snapshots();
+    this.unreadMessageListeners =
+        unreadMessageSnapshots.listen((snapshot) async {
+      final docs = snapshot.docs;
+      final messageRefList = docs.map((doc) => doc['messageRef']).toList();
+      for (DocumentReference messageRef in messageRefList) {
+        // 既読更新
+        await messageRef.update({
+          'read': FieldValue.increment(1.0),
+        });
+        await messageRef
+            .collection('member')
+            .doc(this.currentUser.userId)
+            .update({
+          'read': true,
+        });
+        // 既読更新後に、未読メッセージから削除
+        await chatRoomInfoRef
+            .collection('unreadMessage')
+            .doc(messageRef.id)
+            .delete();
+      }
     });
   }
 
@@ -62,7 +124,7 @@ class TalkModel extends ChangeNotifier {
   }
 
   /// メッセージ送信
-  Future sendMessage(String roomId, String userId) async {
+  Future sendMessage() async {
     if (this.message.isEmpty) {
       throw ('メッセージを入力してください。');
     }
@@ -72,28 +134,44 @@ class TalkModel extends ChangeNotifier {
 
     final createdAt = Timestamp.now();
 
-    await FirebaseFirestore.instance
+    final messageRef = await FirebaseFirestore.instance
         .collection('chatRoom')
-        .doc(roomId)
+        .doc(this.chatRoomInfo.roomId)
         .collection('messages')
-        .add(
-      {
-        'userId': userId,
-        'message': message,
-        'messageType': 'text',
-        'createdAt': createdAt,
-      },
-    );
+        .add({
+      'userId': this.currentUser.userId,
+      'message': message,
+      'messageType': 'text',
+      'createdAt': createdAt,
+      'read': 0,
+    });
 
     for (Member member in this.memberList) {
-      final document = member.usersRef.collection('chatRoomInfo').doc(roomId);
-      await document.update(
-        {
-          'updateAt': createdAt,
-          'resentMessage': message,
-          'visible': true,
-        },
-      );
+      // 既読情報を追加
+      final bool read = member.userId == this.currentUser.userId ? true : false;
+      final unreadRef = messageRef.collection('member').doc(member.userId);
+      await unreadRef.set({
+        'read': read,
+      });
+
+      // 最新のメッセージ情報を更新
+      final document = member.usersRef
+          .collection('chatRoomInfo')
+          .doc(this.chatRoomInfo.roomId);
+      await document.update({
+        'updateAt': createdAt,
+        'resentMessage': message,
+        'visible': true,
+        'unread': read ? 0 : FieldValue.increment(1.0),
+      });
+
+      // 未読メッセージの追加(自分以外)
+      if (!read) {
+        await document
+            .collection('unreadMessage')
+            .doc(messageRef.id)
+            .set({'messageRef': messageRef});
+      }
     }
   }
 
@@ -109,11 +187,9 @@ class TalkModel extends ChangeNotifier {
         .doc(roomId)
         .collection('messages')
         .doc(messages.messageId);
-    await document.update(
-      {
-        'message': updateMessage,
-      },
-    );
+    await document.update({
+      'message': updateMessage,
+    });
 
     // TODO
     // 最新のメッセージが編集された場合のresentMessage更新
@@ -165,65 +241,55 @@ class TalkModel extends ChangeNotifier {
         FirebaseFirestore.instance.collection('users').doc(userId);
 
     // chatRoomを新規作成
-    final roomRef = await FirebaseFirestore.instance.collection('chatRoom').add(
-      {
-        'groupFlg': false,
-        'groupId': '',
-      },
-    );
+    final roomRef =
+        await FirebaseFirestore.instance.collection('chatRoom').add({
+      'groupFlg': false,
+      'groupId': '',
+    });
 
     // '/chatRoom/(ルームID)/member/'を定義
     final roomMemberRef = roomRef.collection('member');
     // 自分と相手を追加
-    await roomMemberRef.doc(this.currentUser.userId).set(
-      {
-        'usersRef': usersRef,
-      },
-    );
-    await roomMemberRef.doc(userId).set(
-      {
-        'usersRef': friendUsersRef,
-      },
-    );
+    await roomMemberRef.doc(this.currentUser.userId).set({
+      'usersRef': usersRef,
+    });
+    await roomMemberRef.doc(userId).set({
+      'usersRef': friendUsersRef,
+    });
 
     // '/users/(ユーザーID)/chatRoomInfo/(ルームID)/'へデータを追加
     String initResentMessage = '';
     final chatRoomInfoRef = usersRef.collection('chatRoomInfo').doc(roomRef.id);
-    await chatRoomInfoRef.set(
-      {
-        'roomRef': roomRef,
-        'resentMessage': initResentMessage,
-        'updateAt': Timestamp.now(),
-        'visible': true,
-      },
-    );
-    await friendUsersRef.collection('chatRoomInfo').doc(roomRef.id).set(
-      {
-        'roomRef': roomRef,
-        'resentMessage': initResentMessage,
-        'updateAt': Timestamp.now(),
-        'visible': false,
-      },
-    );
+    await chatRoomInfoRef.set({
+      'roomRef': roomRef,
+      'resentMessage': initResentMessage,
+      'updateAt': Timestamp.now(),
+      'visible': true,
+    });
+    await friendUsersRef.collection('chatRoomInfo').doc(roomRef.id).set({
+      'roomRef': roomRef,
+      'resentMessage': initResentMessage,
+      'updateAt': Timestamp.now(),
+      'visible': false,
+    });
 
     // '/users/(自分のユーザーID)/friend/'に登録相手のユーザー情報を追加(friendFlg=false)
-    await usersRef.collection('friends').doc(userId).set(
-      {
-        'usersRef': friendUsersRef,
-        'chatRoomInfoRef': usersRef.collection('chatRoomInfo').doc(roomRef.id),
-        'friendFlg': false,
-      },
-    );
+    await usersRef.collection('friends').doc(userId).set({
+      'usersRef': friendUsersRef,
+      'chatRoomInfoRef': usersRef.collection('chatRoomInfo').doc(roomRef.id),
+      'friendFlg': false,
+    });
 
     // '/users/(相手のユーザーID)/friend/'に自分のユーザー情報を追加(friendFlg=false)
-    await friendUsersRef.collection('friends').doc(this.currentUser.userId).set(
-      {
-        'usersRef': usersRef,
-        'chatRoomInfoRef':
-            friendUsersRef.collection('chatRoomInfo').doc(roomRef.id),
-        'friendFlg': false,
-      },
-    );
+    await friendUsersRef
+        .collection('friends')
+        .doc(this.currentUser.userId)
+        .set({
+      'usersRef': usersRef,
+      'chatRoomInfoRef':
+          friendUsersRef.collection('chatRoomInfo').doc(roomRef.id),
+      'friendFlg': false,
+    });
 
     final doc = await usersRef.collection('friends').doc(userId).get();
     return MyFriends(doc);

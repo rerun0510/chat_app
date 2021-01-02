@@ -27,7 +27,45 @@ class BottomNavigationPage extends StatelessWidget {
                 label: 'HOME',
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.textsms_outlined),
+                icon: Stack(
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 40,
+                      child: Icon(Icons.textsms_outlined),
+                    ),
+                    Positioned(
+                      right: 5,
+                      top: 2,
+                      child: Container(
+                        child: model.talkNotification != 0
+                            ? Container(
+                                alignment: Alignment.center,
+                                padding: EdgeInsets.all(1),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 20,
+                                  minHeight: 20,
+                                ),
+                                child: Text(
+                                  model.talkNotification > 999
+                                      ? '999+'
+                                      : model.talkNotification.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                ),
                 label: 'TALK',
               ),
             ],

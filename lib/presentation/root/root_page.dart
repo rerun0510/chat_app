@@ -2,7 +2,6 @@ import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/bottom_navigation/bottom_navigation_page.dart';
 import 'package:chat_app/presentation/root/root_model.dart';
 import 'package:chat_app/presentation/signin/signin_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
