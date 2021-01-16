@@ -31,12 +31,21 @@ class TalkListPage extends StatelessWidget {
                           behavior: HitTestBehavior.opaque,
                           onTap: () async {
                             // トーク画面に遷移
-                            await Navigator.push(
+                            final result = await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => TalkPage(chatRoomInfo),
                               ),
                             );
+                            // トーク画面へ遷移
+                            if (result.runtimeType == ChatRoomInfo) {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => TalkPage(result),
+                                ),
+                              );
+                            }
                           },
                           child: Container(
                             height: 100,

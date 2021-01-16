@@ -21,8 +21,9 @@ class UserModel extends ChangeNotifier {
   bool isMe = false;
   bool isFriend = true;
   bool isGroup = false;
+  bool isMember = false;
   List<String> memberIcon = [];
-  int memberCnt;
+  int memberCnt = 0;
 
   ChatRoomInfo chatRoomInfo;
 
@@ -38,6 +39,7 @@ class UserModel extends ChangeNotifier {
         this.imageURL = myGroups.imageURL;
         this.backgroundImage = myGroups.backgroundImage;
         this.isGroup = true;
+        this.isMember = myGroups.memberFlg;
         fetchChatRoomInfo(myGroups.chatRoomInfoRef, this.currentUser);
         await _fetchMemberIcon(myGroups.groupsRef);
       } else if (myFriends != null) {
@@ -121,7 +123,10 @@ class UserModel extends ChangeNotifier {
     final currentUserRef = FirebaseFirestore.instance
         .collection('users')
         .doc(this.currentUser.userId);
-    this.memberIcon.add(this.currentUser.imageURL);
+    if (this.isMember) {
+      this.memberIcon.add(this.currentUser.imageURL);
+      this.memberCnt += 1;
+    }
     final docs = await groupsRef
         .collection('member')
         .where('usersRef', isNotEqualTo: currentUserRef)
@@ -129,7 +134,7 @@ class UserModel extends ChangeNotifier {
         .get();
     final usersRefList = docs.docs.map((doc) => doc['usersRef']).toList();
     final to = usersRefList.length > 4 ? 3 : usersRefList.length;
-    this.memberCnt = usersRefList.length + 1;
+    this.memberCnt += usersRefList.length;
     for (int i = 0; i < to; i++) {
       final a = await usersRefList[i].get();
       this.memberIcon.add(a['imageURL']);
@@ -169,5 +174,34 @@ class UserModel extends ChangeNotifier {
 
     this.isFriend = true;
     notifyListeners();
+  }
+
+  /// グループへの参加
+  Future joinGroup(MyGroups myGroup) async {
+    await myGroup.groupsRef
+        .collection('member')
+        .doc(this.currentUser.userId)
+        .update({
+      'memberFlg': true,
+    });
+
+    final usersRef = FirebaseFirestore.instance
+        .collection('users')
+        .doc(this.currentUser.userId);
+    final chatRoomRef =
+        FirebaseFirestore.instance.collection('chatRoom').doc(myGroup.groupsId);
+    await chatRoomRef.collection('member').doc(this.currentUser.userId).set({
+      'usersRef': usersRef,
+    });
+
+    // '/users/(ユーザーID)/chatRoomInfo/(ルームID)/'へデータを追加
+    final String initResentMessage = '';
+    await myGroup.chatRoomInfoRef.set({
+      'roomRef': chatRoomRef,
+      'resentMessage': initResentMessage,
+      'updateAt': Timestamp.now(),
+      'visible': true,
+      'unread': 0,
+    });
   }
 }

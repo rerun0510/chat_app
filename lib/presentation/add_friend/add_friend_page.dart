@@ -1,3 +1,4 @@
+import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/presentation/add_friend/add_friend_model.dart';
 import 'package:chat_app/presentation/search_friend/search_friend_page.dart';
@@ -143,14 +144,21 @@ class AddFriendPage extends StatelessWidget {
           child: ListTile(
             onTap: () async {
               // ユーザー画面に遷移
-              await showModalBottomSheet(
+              final result = await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
                 useRootNavigator: true,
-                builder: (context) => UserPage(null, myFriend, false),
+                builder: (context) => MaterialApp(
+                  home: UserPage(null, myFriend, false, false),
+                ),
               );
               // データ再読み込み
               await model.fetchMayBeFriend();
+
+              // トーク画面へ遷移
+              if (result.runtimeType == ChatRoomInfo) {
+                Navigator.of(context, rootNavigator: true).pop(result);
+              }
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
             leading: Container(

@@ -1,5 +1,7 @@
+import 'package:chat_app/domain/chatRoomInfo.dart';
 import 'package:chat_app/domain/users.dart';
 import 'package:chat_app/presentation/home/home_model.dart';
+import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:chat_app/presentation/user/user_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -69,7 +71,9 @@ class HomePage extends StatelessWidget {
         await showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          builder: (context) => UserPage(null, null, false),
+          builder: (context) => MaterialApp(
+            home: UserPage(null, null, false, false),
+          ),
         );
         await model.reload();
       },
@@ -110,11 +114,22 @@ class HomePage extends StatelessWidget {
           (group) => ListTile(
             onTap: () async {
               // ユーザー画面に遷移
-              await showModalBottomSheet(
+              final result = await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(group, null, false),
+                builder: (context) => MaterialApp(
+                  home: UserPage(group, null, false, false),
+                ),
               );
+              // トーク画面へ遷移
+              if (result.runtimeType == ChatRoomInfo) {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TalkPage(result),
+                  ),
+                );
+              }
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
             leading: _userImage(group.imageURL, 50.0),
@@ -152,11 +167,22 @@ class HomePage extends StatelessWidget {
           (friend) => ListTile(
             onTap: () async {
               // ユーザー画面に遷移
-              await showModalBottomSheet(
+              final result = await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(null, friend, false),
+                builder: (context) => MaterialApp(
+                  home: UserPage(null, friend, false, false),
+                ),
               );
+              // トーク画面へ遷移
+              if (result.runtimeType == ChatRoomInfo) {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TalkPage(result),
+                  ),
+                );
+              }
             },
             contentPadding: EdgeInsets.fromLTRB(20, 5, 20, 5),
             leading: _userImage(friend.imageURL, 50.0),

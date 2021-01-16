@@ -38,11 +38,22 @@ class HomePageAppBar {
             }
             // create_group_pageからのuser_pageへの遷移
             if (result.runtimeType == MyGroups) {
-              await showModalBottomSheet(
+              final userPageResult = await showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (context) => UserPage(result, null, false),
+                builder: (context) => MaterialApp(
+                  home: UserPage(result, null, false, false),
+                ),
               );
+              // トーク画面へ遷移
+              if (userPageResult.runtimeType == ChatRoomInfo) {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TalkPage(userPageResult),
+                  ),
+                );
+              }
             }
           },
           padding: EdgeInsets.fromLTRB(0, 0, 15, 0),

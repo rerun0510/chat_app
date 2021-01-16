@@ -194,6 +194,7 @@ class CreateGroupModel extends ChangeNotifier {
         'resentMessage': initResentMessage,
         'updateAt': Timestamp.now(),
         'visible': true,
+        'unread': 0,
       });
 
       // '/users/(ユーザーID)/groups/'にグループ情報を追加

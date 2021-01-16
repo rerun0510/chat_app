@@ -268,15 +268,17 @@ class TalkPage extends StatelessWidget {
                             // ユーザー画面に遷移
                             MyFriends myFriend =
                                 await model.getUserPageInfo(messages.userId);
-                            await showModalBottomSheet(
+                            final result = await showModalBottomSheet(
                               context: context,
                               isScrollControlled: true,
-                              builder: (context) => UserPage(
-                                null,
-                                myFriend,
-                                true,
+                              builder: (context) => MaterialApp(
+                                home: UserPage(null, myFriend, true, false),
                               ),
                             );
+                            // トーク画面へ遷移
+                            if (result.runtimeType == ChatRoomInfo) {
+                              Navigator.of(context).pop(result);
+                            }
                           },
                           child: Container(
                             decoration: BoxDecoration(

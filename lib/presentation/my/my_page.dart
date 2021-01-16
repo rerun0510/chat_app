@@ -29,8 +29,7 @@ class MyPage extends StatelessWidget {
                     title: Text('プロフィール'),
                     actions: [
                       IconButton(
-                        onPressed: () =>
-                            Navigator.of(context, rootNavigator: true).pop(),
+                        onPressed: () => Navigator.of(context).pop(),
                         icon: Icon(
                           Icons.clear,
                         ),

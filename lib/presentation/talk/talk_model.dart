@@ -265,12 +265,14 @@ class TalkModel extends ChangeNotifier {
       'resentMessage': initResentMessage,
       'updateAt': Timestamp.now(),
       'visible': true,
+      'unread': 0
     });
     await friendUsersRef.collection('chatRoomInfo').doc(roomRef.id).set({
       'roomRef': roomRef,
       'resentMessage': initResentMessage,
       'updateAt': Timestamp.now(),
       'visible': false,
+      'unread': 0,
     });
 
     // '/users/(自分のユーザーID)/friend/'に登録相手のユーザー情報を追加(friendFlg=false)

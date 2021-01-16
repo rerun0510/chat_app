@@ -1,18 +1,19 @@
 import 'package:chat_app/domain/myFriends.dart';
 import 'package:chat_app/domain/myGroups.dart';
+import 'package:chat_app/presentation/member/member_page.dart';
 import 'package:chat_app/presentation/my/my_page.dart';
-import 'package:chat_app/presentation/talk/talk_page.dart';
 import 'package:chat_app/presentation/user/user_model.dart';
 import 'package:chat_app/presentation/user_image/user_image_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class UserPage extends StatelessWidget {
-  UserPage(this.myGroups, this.myFriends, this.talkPageFlg);
+  UserPage(this.myGroups, this.myFriends, this.talkPageFlg, this.memberPageFlg);
 
   final MyFriends myFriends;
   final MyGroups myGroups;
   final bool talkPageFlg;
+  final bool memberPageFlg;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +55,7 @@ class UserPage extends StatelessWidget {
                       ),
                       child: SafeArea(
                         child: Container(
-                          padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
+                          // padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
                           child: Center(
                             child: Column(
                               children: [
@@ -158,18 +159,28 @@ class UserPage extends StatelessWidget {
           child: model.isMe
               ? IconButton(
                   onPressed: () async {
-                    await showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (context) => Container(
-                        height: MediaQuery.of(context).size.height * 0.9,
-                        child: Navigator(
-                          onGenerateRoute: (context) => MaterialPageRoute(
-                            builder: (context) => MyPage(controller),
-                          ),
-                        ),
-                      ),
-                    );
+                    // await showModalBottomSheet(
+                    //   context: context,
+                    //   isScrollControlled: true,
+                    //   // builder: (context) => Container(
+                    //   //   height: MediaQuery.of(context).size.height * 0.9,
+                    //   //   child: Navigator(
+                    //   //     onGenerateRoute: (context) => MaterialPageRoute(
+                    //   //       builder: (context) => MyPage(controller),
+                    //   //     ),
+                    //   //   ),
+                    //   // ),
+                    //   builder: (context) => MaterialApp(
+                    //     home: MyPage(controller),
+                    //   ),
+                    // );
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyPage(controller),
+                          //以下を追加
+                          fullscreenDialog: true,
+                        ));
                     // プロフィール再表示
                     await model.reload();
                   },
@@ -215,9 +226,14 @@ class UserPage extends StatelessWidget {
     final cnt = model.memberIcon.length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () {
+      onTap: () async {
         // メンバー画面に遷移
-        print('メンバー画面に遷移');
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MemberPage(this.myGroups.groupsId),
+          ),
+        );
       },
       child: Container(
         padding: EdgeInsets.only(top: 16.0),
@@ -280,13 +296,21 @@ class UserPage extends StatelessWidget {
   Widget _btn(UserModel model, BuildContext context) {
     return model.isMe
         ? Container()
-        : Row(
-            children: [
-              model.isFriend
-                  ? _talkBtn(model, context)
-                  : _addFriendBtn(model, context),
-            ],
-          );
+        : model.isGroup
+            ? Row(
+                children: [
+                  model.isMember
+                      ? _talkBtn(model, context)
+                      : _joinGroupBtn(model),
+                ],
+              )
+            : Row(
+                children: [
+                  model.isFriend
+                      ? _talkBtn(model, context)
+                      : _addFriendBtn(model),
+                ],
+              );
   }
 
   /// TalkBtn
@@ -302,17 +326,28 @@ class UserPage extends StatelessWidget {
             ),
             onPressed: () async {
               // トーク画面に遷移
-              Navigator.of(context).pop();
-              // トーク画面 → ユーザー画面 → トーク画面で遷移が行われている場合２回popする
-              if (this.talkPageFlg) {
-                Navigator.of(context).pop();
-              }
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TalkPage(model.chatRoomInfo),
-                ),
-              );
+              // Navigator.of(context).pop();
+              // if (this.talkPageFlg) {
+              //   // トーク画面 → ユーザー画面 → トーク画面で遷移が行われている場合２回popする
+              //   Navigator.of(context).pop();
+              //   Navigator.of(context, rootNavigator: true);
+              // } else if (this.memberPageFlg) {
+              //   // メンバー画面 → ユーザー画面 → トーク画面で遷移が行われている場合３回popする
+              //   // Navigator.of(context).pop();
+              //   // Navigator.of(context).pop();
+              //   Navigator.of(context, rootNavigator: true);
+              // }
+              // Navigator.of(context, rootNavigator: true);
+              // Navigator.of(context).pop();
+              // トーク画面に遷移
+              Navigator.of(context, rootNavigator: true)
+                  .pop(model.chatRoomInfo);
+              // await Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => TalkPage(model.chatRoomInfo),
+              //   ),
+              // );
             },
           ),
           Text(
@@ -328,7 +363,7 @@ class UserPage extends StatelessWidget {
   }
 
   /// AddFriendBtn
-  Widget _addFriendBtn(UserModel model, BuildContext context) {
+  Widget _addFriendBtn(UserModel model) {
     return Expanded(
       child: Column(
         children: [
@@ -345,6 +380,35 @@ class UserPage extends StatelessWidget {
           ),
           Text(
             'ADD',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// JoinGroupBtn
+  Widget _joinGroupBtn(UserModel model) {
+    return Expanded(
+      child: Column(
+        children: [
+          IconButton(
+            icon: Icon(
+              Icons.group_add,
+              color: Colors.white,
+              size: 35,
+            ),
+            onPressed: () async {
+              // グループに参加
+              // model.addFriend(myFriends);
+              print('Join');
+            },
+          ),
+          Text(
+            'JOIN',
             style: TextStyle(
               color: Colors.white,
               fontSize: 16,
