@@ -158,12 +158,17 @@ class MemberPage extends StatelessWidget {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () async {
-              final MyFriends friend = await model.fetchFriend(member.userId);
+              MyFriends friend;
+              if (member.userId != model.currentUser.userId) {
+                friend = await model.fetchFriend(member.userId);
+              }
               // ユーザー画面に遷移
-              await showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (context) => UserPage(null, friend, false, true),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => UserPage(null, friend, false, true),
+                  fullscreenDialog: true,
+                ),
               );
             },
             child: Container(

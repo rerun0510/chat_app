@@ -25,16 +25,11 @@ class MyPage extends StatelessWidget {
                       : null)
               : Scaffold(
                   appBar: AppBar(
-                    leading: Container(),
+                    leading: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: Icon(Icons.arrow_back_ios),
+                    ),
                     title: Text('プロフィール'),
-                    actions: [
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(
-                          Icons.clear,
-                        ),
-                      ),
-                    ],
                   ),
                   body: Container(
                     color: Colors.white10,

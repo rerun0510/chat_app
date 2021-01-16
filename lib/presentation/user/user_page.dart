@@ -41,6 +41,7 @@ class UserPage extends StatelessWidget {
                         builder: (context) => UserImagePage(
                             model.id, model.isMe, model.isGroup, false),
                       );
+
                       // 画像変更後のリロード
                       if (model.isMe) {
                         await model.reload();
@@ -148,7 +149,13 @@ class UserPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          onPressed: () {
+            if (this.memberPageFlg) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          },
           icon: Icon(
             Icons.clear,
             color: Colors.white,
@@ -159,28 +166,12 @@ class UserPage extends StatelessWidget {
           child: model.isMe
               ? IconButton(
                   onPressed: () async {
-                    // await showModalBottomSheet(
-                    //   context: context,
-                    //   isScrollControlled: true,
-                    //   // builder: (context) => Container(
-                    //   //   height: MediaQuery.of(context).size.height * 0.9,
-                    //   //   child: Navigator(
-                    //   //     onGenerateRoute: (context) => MaterialPageRoute(
-                    //   //       builder: (context) => MyPage(controller),
-                    //   //     ),
-                    //   //   ),
-                    //   // ),
-                    //   builder: (context) => MaterialApp(
-                    //     home: MyPage(controller),
-                    //   ),
-                    // );
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyPage(controller),
-                          //以下を追加
-                          fullscreenDialog: true,
-                        ));
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MyPage(controller),
+                      ),
+                    );
                     // プロフィール再表示
                     await model.reload();
                   },

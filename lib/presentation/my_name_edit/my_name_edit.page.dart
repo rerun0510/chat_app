@@ -34,15 +34,15 @@ class MyNameEditPage extends StatelessWidget {
                         icon: Icon(Icons.arrow_back_ios),
                       ),
                       title: Text('名前'),
-                      actions: [
-                        IconButton(
-                          onPressed: () =>
-                              Navigator.of(context, rootNavigator: true).pop(),
-                          icon: Icon(
-                            Icons.clear,
-                          ),
-                        ),
-                      ],
+                      // actions: [
+                      //   IconButton(
+                      //     onPressed: () =>
+                      //         Navigator.of(context, rootNavigator: true).pop(),
+                      //     icon: Icon(
+                      //       Icons.clear,
+                      //     ),
+                      //   ),
+                      // ],
                     ),
                     body: Container(
                       color: Colors.white10,

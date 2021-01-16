@@ -51,7 +51,7 @@ class UserImagePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
-          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           icon: Icon(
             Icons.clear,
             color: Colors.white,
