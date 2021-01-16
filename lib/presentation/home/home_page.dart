@@ -121,6 +121,7 @@ class HomePage extends StatelessWidget {
                   home: UserPage(group, null, false, false),
                 ),
               );
+
               // トーク画面へ遷移
               if (result.runtimeType == ChatRoomInfo) {
                 await Navigator.push(

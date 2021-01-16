@@ -163,12 +163,17 @@ class MemberPage extends StatelessWidget {
                 friend = await model.fetchFriend(member.userId);
               }
               // ユーザー画面に遷移
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => UserPage(null, friend, false, true),
-                  fullscreenDialog: true,
-                ),
+              // Navigator.push(
+              //   context,
+              //   MaterialPageRoute(
+              //     builder: (context) => UserPage(null, friend, false, true),
+              //     fullscreenDialog: true,
+              //   ),
+              // );
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => UserPage(null, friend, false, true),
               );
             },
             child: Container(

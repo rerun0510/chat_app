@@ -18,7 +18,8 @@ class UserPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextEditingController controller = TextEditingController();
-
+    final padding =
+        this.memberPageFlg ? EdgeInsets.fromLTRB(2, 40, 2, 0) : null;
     return ChangeNotifierProvider<UserModel>(
       create: (_) => UserModel(myGroups, myFriends),
       child: Consumer<UserModel>(
@@ -56,7 +57,7 @@ class UserPage extends StatelessWidget {
                       ),
                       child: SafeArea(
                         child: Container(
-                          // padding: EdgeInsets.fromLTRB(2, 40, 2, 0),
+                          padding: padding,
                           child: Center(
                             child: Column(
                               children: [
@@ -151,7 +152,7 @@ class UserPage extends StatelessWidget {
         IconButton(
           onPressed: () {
             if (this.memberPageFlg) {
-              Navigator.of(context).pop();
+              Navigator.pop(context);
             } else {
               Navigator.of(context, rootNavigator: true).pop();
             }
